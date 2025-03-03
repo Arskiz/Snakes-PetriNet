@@ -261,7 +261,83 @@
     font-size: 18px;
 }
 
+/* Add this to your style-petrinet.css file or include within a <style> tag in the head */
 
+.simulation-controls {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sim-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #005F7A;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.sim-button:hover {
+    background-color: #0A3541;
+    transform: translateY(-1px);
+}
+
+.sim-button:active {
+    transform: translateY(1px);
+}
+
+.sim-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.token-transition {
+    fill: #FF5722;
+    opacity: 0.8;
+    filter: drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5));
+}
+
+.transition-active {
+    stroke: #FF5722;
+    stroke-width: 3px;
+    filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
+}
+
+#sim-speed {
+    width: 120px;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+
+.simulation-info {
+    font-size: 12px;
+    color: #555;
+    margin-left: 10px;
+}
+
+/* Add a pulse animation for firing transitions */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.pulse-animation {
+    animation: pulse 0.5s ease-in-out;
+}
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {

@@ -1,0 +1,111 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "p1",
+      "tokens": 2,
+      "top": 300,
+      "left": 600
+    },
+    {
+      "id": "p2",
+      "name": "p2",
+      "tokens": 0,
+      "top": 473,
+      "left": 500
+    },
+    {
+      "id": "p3",
+      "name": "p3",
+      "tokens": 3,
+      "top": 473,
+      "left": 301
+    },
+    {
+      "id": "p4",
+      "name": "p4",
+      "tokens": 3,
+      "top": 300,
+      "left": 200
+    },
+    {
+      "id": "p5",
+      "name": "p5",
+      "tokens": 3,
+      "top": 127,
+      "left": 300
+    },
+    {
+      "id": "p6",
+      "name": "p6",
+      "tokens": 3,
+      "top": 127,
+      "left": 500
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t1",
+      "name": "t1",
+      "from": [
+        "p3",
+        "p5"
+      ],
+      "to": [
+        "p2"
+      ],
+      "top": 240.0,
+      "left": 400
+    },
+    {
+      "id": "t2",
+      "name": "t2",
+      "from": [
+        "p1",
+        "p4",
+        "p6"
+      ],
+      "to": [],
+      "top": 300.0,
+      "left": 400
+    }
+  ],
+  "arcs": [
+    {
+      "source": "p1",
+      "target": "t2",
+      "type": "input",
+      "weight": "1"
+    },
+    {
+      "source": "p3",
+      "target": "t1",
+      "type": "input",
+      "weight": "1"
+    },
+    {
+      "source": "p4",
+      "target": "t2",
+      "type": "input",
+      "weight": "1"
+    },
+    {
+      "source": "p5",
+      "target": "t1",
+      "type": "input",
+      "weight": "1"
+    },
+    {
+      "source": "p6",
+      "target": "t2",
+      "type": "input",
+      "weight": "1"
+    },
+    {
+      "source": "t1",
+      "target": "p2",
+      "type": "output",
+      "weight": "1"
+    }
+  ]
+}

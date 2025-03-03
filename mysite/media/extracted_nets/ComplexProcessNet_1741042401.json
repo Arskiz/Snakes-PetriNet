@@ -1,0 +1,132 @@
+{
+  "places": [
+    {
+      "id": "raw_materials",
+      "name": "raw_materials",
+      "tokens": 1,
+      "top": 300,
+      "left": 600
+    },
+    {
+      "id": "processing_queue",
+      "name": "processing_queue",
+      "tokens": 0,
+      "top": 408,
+      "left": 568
+    },
+    {
+      "id": "machine_1_available",
+      "name": "machine_1_available",
+      "tokens": 1,
+      "top": 481,
+      "left": 483
+    },
+    {
+      "id": "machine_2_available",
+      "name": "machine_2_available",
+      "tokens": 1,
+      "top": 497,
+      "left": 372
+    },
+    {
+      "id": "machine_3_available",
+      "name": "machine_3_available",
+      "tokens": 1,
+      "top": 451,
+      "left": 270
+    },
+    {
+      "id": "intermediate_storage",
+      "name": "intermediate_storage",
+      "tokens": 0,
+      "top": 356,
+      "left": 209
+    },
+    {
+      "id": "quality_check_queue",
+      "name": "quality_check_queue",
+      "tokens": 0,
+      "top": 244,
+      "left": 209
+    },
+    {
+      "id": "passed_qc",
+      "name": "passed_qc",
+      "tokens": 0,
+      "top": 149,
+      "left": 270
+    },
+    {
+      "id": "failed_qc",
+      "name": "failed_qc",
+      "tokens": 0,
+      "top": 103,
+      "left": 372
+    },
+    {
+      "id": "packaging",
+      "name": "packaging",
+      "tokens": 0,
+      "top": 119,
+      "left": 483
+    },
+    {
+      "id": "finished_goods",
+      "name": "finished_goods",
+      "tokens": 0,
+      "top": 192,
+      "left": 568
+    }
+  ],
+  "transitions": [
+    {
+      "id": "start_processing",
+      "name": "start_processing",
+      "from": [],
+      "to": [],
+      "top": 120.0,
+      "left": 400
+    },
+    {
+      "id": "machine1_complete",
+      "name": "machine1_complete",
+      "from": [],
+      "to": [],
+      "top": 180.0,
+      "left": 400
+    },
+    {
+      "id": "quality_check",
+      "name": "quality_check",
+      "from": [],
+      "to": [],
+      "top": 240.0,
+      "left": 400
+    },
+    {
+      "id": "rework",
+      "name": "rework",
+      "from": [],
+      "to": [],
+      "top": 300.0,
+      "left": 400
+    },
+    {
+      "id": "begin_packaging",
+      "name": "begin_packaging",
+      "from": [],
+      "to": [],
+      "top": 360.0,
+      "left": 400
+    },
+    {
+      "id": "complete_packaging",
+      "name": "complete_packaging",
+      "from": [],
+      "to": [],
+      "top": 420.0,
+      "left": 400
+    }
+  ],
+  "arcs": []
+}
