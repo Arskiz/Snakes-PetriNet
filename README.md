@@ -23,6 +23,13 @@ This project provides an interactive web interface for creating, editing and vis
    ```
 2. Open your web browser and navigate to `http://localhost:8000`
 
+3. To clean up temporary files, run `cleanup-files.bat`:
+   ```
+   cd mysite
+   python manage.py cleanup_files
+   ```
+   This will remove any temporary files created during usage.
+
 ## Features
 
 - Interactive CPN visualization
