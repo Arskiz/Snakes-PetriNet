@@ -32,6 +32,73 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     </head>
 
+    <script>
+        // File input handling
+        function updateFileName() {
+            var mainInput = document.getElementById('mainFileInput');
+            var input = document.getElementById('fileInput');
+            var fileName = document.getElementById('fileName');
+            
+            if (mainInput && mainInput.files.length > 0) {
+                fileName.innerText = mainInput.files[0].name;
+            } else if (input && input.files.length > 0) {
+                fileName.innerText = input.files[0].name;
+            } else {
+                fileName.innerText = "";
+            }
+        }
+
+        function uploadFile() {
+            var mainInput = document.getElementById('mainFileInput');
+            var input = document.getElementById('fileInput');
+            var fileToUpload;
+
+            if (mainInput && mainInput.files.length > 0) {
+                fileToUpload = mainInput.files[0];
+            } else if (input && input.files.length > 0) {
+                fileToUpload = input.files[0];
+            }
+
+            if (!fileToUpload) {
+                alert("No file selected!");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', fileToUpload);
+            var csrfToken = document.getElementById('csrf_token').value;
+
+            // Show loading state
+            document.getElementById('fileName').innerHTML = '<span class="loading-spinner"></span> Uploading...';
+            
+            fetch("{{ url('upload_file') }}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('fileName').innerHTML = '<span class="success-icon">✓</span> Upload successful!';
+                    setTimeout(() => {
+                        $('#popupDialog').popup('close');
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        }
+                    }, 1000);
+                } else {
+                    document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> ' + (data.error || data.message || "Unknown error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> Upload failed';
+            });
+        }
+    </script>
+
     <body id="body">
         <!-- Header Section -->
         <header id="header">
@@ -130,6 +197,36 @@
             </div>
         </div>
 
+        <!-- Pop-up dialog for file selection -->
+        <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="a" data-dismissible="false" class="file-upload-popup">
+            <div class="popup-header">
+                <h3>Upload Petri Net File</h3>
+                <button class="close-button" onclick="window.location.href = '#'" data-rel="back">×</button>
+            </div>
+            
+            <div class="popup-content">
+                <p>Select a CPN file to analyze.</p>
+                
+                <form id="fileUploadForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+                    
+                    <div class="file-input-container">
+                        <input type="file" accept=".py" id="fileInput" name="file" onchange="updateFileName()" />
+                        <label class="label" for="fileInput" class="file-input-label">
+                            <span class="file-icon">📁</span>
+                            <span class="white">Choose File</span>
+                        </label>
+                        <p id="fileName" class="selected-filename"></p>
+                    </div>
+                    
+                    <div class="popup-actions">
+                        <button type="button" onclick="window.location.href = '#'" class="popup-button secondary" data-rel="back">Cancel</button>
+                        <button type="button" class="popup-button primary" onclick="uploadFile()">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <footer id="footer">
             <div id="innerFooter">
                 <p id="footerText" class="white pText textAlignCenter">
@@ -140,7 +237,17 @@
 
         <div id="blurOverlay" class="blurCard hidden2"></div>
         <canvas id="canvas"></canvas>
-    {% block beforeBodyEnd %} {% endblock %}
+    {% block beforeBodyEnd %}
+    <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="a" data-dismissible="false" style="max-width:400px;">
+        <div role="main" class="ui-content">
+            <h3 class="ui-title">Upload a file</h3>
+            <p>Choose a file to Upload.</p>
+            <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">Close</a>
+        </div>
+    </div>
+
+    
+    {% endblock %}
     </body>
     <script src="{{ static('assets/scripts/js.js') }}"></script>
 

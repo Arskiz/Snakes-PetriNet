@@ -131,40 +131,9 @@ Petri Net Analysis: {{ filename }}
         </a>
     </div>
 </div>
-
-<!-- Pop-up dialog for file selection -->
-<div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="a" data-dismissible="false" class="file-upload-popup">
-    <div class="popup-header">
-        <h3>Import Petri Net File</h3>
-        <button class="close-button" onclick="window.location.href = '#'" data-rel="back">×</button>
-    </div>
-    
-    <div class="popup-content">
-        <p>Select a CPN file to analyze.</p>
-        
-        <form id="fileUploadForm" method="POST" enctype="multipart/form-data">
-            <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
-            
-            <div class="file-input-container">
-                <input type="file" accept=".py" id="fileInput" name="file" onchange="updateFileName()" />
-                <label for="fileInput" class="file-input-label">
-                    <span class="file-icon">📁</span>
-                    <span>Choose File</span>
-                </label>
-                <p id="fileName" class="selected-filename"></p>
-            </div>
-            
-            <div class="popup-actions">
-                <button type="button" onclick="window.location.href = '#'" class="popup-button secondary" data-rel="back">Cancel</button>
-                <button type="button" class="popup-button primary" onclick="uploadFile()">Import</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
-    // Tab switching functionality
-    function openTab(evt, tabName) {
+     // Tab switching functionality
+     function openTab(evt, tabName) {
         // Hide all tab content
         var tabContents = document.getElementsByClassName("tab-content");
         for (var i = 0; i < tabContents.length; i++) {
@@ -181,60 +150,7 @@ Petri Net Analysis: {{ filename }}
         document.getElementById(tabName).classList.add("active");
         evt.currentTarget.classList.add("active");
     }
-
-    // File input handling
-    function updateFileName() {
-        var input = document.getElementById('fileInput');
-        var fileName = document.getElementById('fileName');
-        if (input.files.length > 0) {
-            fileName.innerText = input.files[0].name;
-        } else {
-            fileName.innerText = "";
-        }
-    }
-
-    function uploadFile() {
-        var input = document.getElementById('fileInput');
-        if (input.files.length === 0) {
-            alert("No file selected!");
-            return;
-        }
-
-        var formData = new FormData();
-        formData.append('file', input.files[0]);
-        var csrfToken = document.getElementById('csrf_token').value;
-
-        // Show loading state
-        document.getElementById('fileName').innerHTML = '<span class="loading-spinner"></span> Uploading...';
-        
-        fetch("{{ url('upload_file') }}", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRFToken": csrfToken
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('fileName').innerHTML = '<span class="success-icon">✓</span> Upload successful!';
-                setTimeout(() => {
-                    $('#popupDialog').popup('close');
-                    if (data.redirect_url) {
-                        window.location.href = data.redirect_url;
-                    }
-                }, 1000);
-            } else {
-                document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> ' + (data.error || data.message || "Unknown error");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> Upload failed';
-        });
-    }
 </script>
-
 <script type="module">
     import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
    // Replace the canvas visualization with this D3.js implementation
@@ -778,6 +694,10 @@ document.addEventListener('DOMContentLoaded', function() {
         style="filter: invert(100%);"
         alt="home-icon">
 </div>
+{% endblock %}
+
+{% block canvas %}
+<script type="module" src="{{ static('assets/scripts/canvas.js') }}"></script>
 {% endblock %}
 
 <!-- Footer -->

@@ -8,10 +8,12 @@
     --blurBG: rgba(255, 255, 255, 0.15);
 }
 
-p, span, h1, h2, h3, h4, h5, h6, a {
-    font-family: var(--mercFont);
+p, span, h1, h2, h3, h4, h5, h6, a, tr, th label{
+    font-family: Nunito;
     text-shadow: none !important;
 }
+
+
 
 .link{
     transition: all 0.3s ease;
@@ -82,7 +84,17 @@ p, span, h1, h2, h3, h4, h5, h6, a {
 
 label{
     font-family: var(--mercFont);
-    width: 12em !important;
+    
+}
+
+.label{
+    width: 12em;
+    background: linear-gradient(90deg, #005f7a 0%, #516540 100%);
+    border-radius: 8px;
+    padding: 12px 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: Nunito;
 }
 
 .file-input-label {
@@ -425,9 +437,19 @@ html,
     overflow-x: hidden;
 }
 
+.excSpan{
+    font-size: 40px;
+}
+
+.container-align-center{
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+
 .card{
     transition: all 0.3s;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(5px);
     border-radius: 20px;
     padding: 20px;
     margin: 20px;
@@ -487,8 +509,7 @@ html,
     position: fixed;
     bottom: 0%;
     height: 80px;
-    align-items: center;
-    justify-content: center;
+    width: 97%;
 }
 
 .mainPageContent{
@@ -965,7 +986,7 @@ canvas {
     top: 0px;
     bottom: 0px;
     z-index: -2;
-    background: linear-gradient(90deg, rgba(222, 249, 255, 0.95) 0%, rgba(83, 141, 156, 0.95) 100%);
+    background: linear-gradient(90deg, rgba(186, 255, 248, 0.95) 0%, rgba(170, 238, 255, 0.95) 100%);
     overflow: hidden;
     width: 100%;
     height: 100%;

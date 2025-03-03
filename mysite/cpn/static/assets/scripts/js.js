@@ -207,6 +207,5 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.left = leftVal + 'px';
     });
 });
-
-
+    
 // Template created in 2024, Copyright © Aron Särkioja. All rights reserved.
