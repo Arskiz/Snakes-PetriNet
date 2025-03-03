@@ -19,7 +19,7 @@ Petri Net Analysis: {{ filename }}
     <div class="visualization-section">
         <h2>Visual Representation</h2>
         <div class="canvas-container">
-            <canvas id="petri-net-canvas" width="800" height="600"></canvas>
+            
         </div>
     </div>
     
@@ -233,988 +233,530 @@ Petri Net Analysis: {{ filename }}
             document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> Upload failed';
         });
     }
+</script>
 
-// Initialize Petri Net visualization with network-based layout and overlap prevention
+<script type="module">
+    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+   // Replace the canvas visualization with this D3.js implementation
 document.addEventListener('DOMContentLoaded', function() {
     const petriNetData = {{ petri_net_data|safe }};
-    const canvasContainer = document.querySelector('.canvas-container');
-    const canvas = document.getElementById('petri-net-canvas');
     
-    if (!canvas) {
-        console.error("Canvas element not found!");
-        return;
-    }
+    // Create nodes and links arrays for D3
+    const nodes = [];
+    const links = [];
     
-    // Store original data for redraws
-    let placePositions = {};
-    let transPositions = {};
-    
-    // Initial setup and draw
-    setupAndDraw();
-    
-    // Add resize event listener with debounce
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            console.log("Redrawing Petri net due to resize");
-            setupAndDraw();
-        }, 250);
+    // Add places as nodes
+    petriNetData.places.forEach(place => {
+        nodes.push({
+            id: place.id,
+            name: place.name || place.id,
+            type: 'place',
+            tokens: place.tokens || 0
+        });
     });
     
-    // Main setup and drawing function
-    function setupAndDraw() {
-        // Reset position collections for redraw
-        placePositions = {};
-        transPositions = {};
-        
-        // Set canvas dimensions to match container
-        canvas.width = canvasContainer.offsetWidth;
-        canvas.height = canvasContainer.offsetHeight;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            console.error("Could not get canvas context!");
-            return;
-        }
-        
-        // Reset and prepare canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Set some styles
-        ctx.lineWidth = 2;
-        ctx.font = '14px "Nunito", sans-serif';
-        
-        // Calculate center of canvas for initial positioning
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        
-        // Calculate optimal node size based on canvas dimensions
-        const minDimension = Math.min(canvas.width, canvas.height);
-        const placeRadius = Math.min(25, minDimension * 0.05); // Node visual size
-        
-        // Analyze the network structure
-        analyzeNetworkStructure();
-        
-        // Position nodes based on network structure
-        layoutNetworkNodes(centerX, centerY);
-        
-        // Add initial jitter to prevent perfect overlaps
-        addRandomJitter();
-        
-        // Apply force-directed layout to improve positions
-        runForceDirectedLayout(centerX, centerY, placeRadius);
-        
-        // Final overlap check
-        preventOverlaps(placeRadius);
-        
-        // Draw all elements after positions are calculated
-        drawPlaces(ctx, placeRadius);
-        drawTransitions(ctx);
-        drawConnections(ctx, placeRadius);
-        
-        // Add a legend in the corner
-        drawLegend(ctx, canvas.width, canvas.height);
-    }
-    
-    // Add slight random offset to all nodes to prevent perfect overlaps
-    function addRandomJitter() {
-        const jitterAmount = 10;
-        
-        for (const id in placePositions) {
-            placePositions[id].x += (Math.random() - 0.5) * jitterAmount;
-            placePositions[id].y += (Math.random() - 0.5) * jitterAmount;
-        }
-        
-        for (const id in transPositions) {
-            transPositions[id].x += (Math.random() - 0.5) * jitterAmount;
-            transPositions[id].y += (Math.random() - 0.5) * jitterAmount;
-        }
-    }
-    
-    // Final check to ensure no overlaps remain
-    function preventOverlaps(placeRadius) {
-        const minDistance = placeRadius * 2.5; // Minimum distance between place centers
-        const minTransDistance = 45; // Minimum distance between transition centers
-        const placeTransDistance = placeRadius + 30; // Min distance between place and transition
-        let iterations = 0;
-        let maxIterations = 50;
-        let overlapsExist = true;
-        
-        while (overlapsExist && iterations < maxIterations) {
-            overlapsExist = false;
-            iterations++;
-            
-            // Check place-place overlaps
-            const placeIds = Object.keys(placePositions);
-            for (let i = 0; i < placeIds.length; i++) {
-                for (let j = i + 1; j < placeIds.length; j++) {
-                    const p1 = placePositions[placeIds[i]];
-                    const p2 = placePositions[placeIds[j]];
-                    
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < minDistance) {
-                        // Move places away from each other
-                        overlapsExist = true;
-                        const angle = Math.atan2(dy, dx);
-                        const moveDistance = (minDistance - distance) / 2;
-                        
-                        p1.x -= Math.cos(angle) * moveDistance;
-                        p1.y -= Math.sin(angle) * moveDistance;
-                        p2.x += Math.cos(angle) * moveDistance;
-                        p2.y += Math.sin(angle) * moveDistance;
-                    }
-                }
-            }
-            
-            // Check transition-transition overlaps
-            const transIds = Object.keys(transPositions);
-            for (let i = 0; i < transIds.length; i++) {
-                for (let j = i + 1; j < transIds.length; j++) {
-                    const t1 = transPositions[transIds[i]];
-                    const t2 = transPositions[transIds[j]];
-                    
-                    const dx = t2.x - t1.x;
-                    const dy = t2.y - t1.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < minTransDistance) {
-                        // Move transitions away from each other
-                        overlapsExist = true;
-                        const angle = Math.atan2(dy, dx);
-                        const moveDistance = (minTransDistance - distance) / 2;
-                        
-                        t1.x -= Math.cos(angle) * moveDistance;
-                        t1.y -= Math.sin(angle) * moveDistance;
-                        t2.x += Math.cos(angle) * moveDistance;
-                        t2.y += Math.sin(angle) * moveDistance;
-                    }
-                }
-            }
-            
-            // Check place-transition overlaps
-            for (const placeId in placePositions) {
-                for (const transId in transPositions) {
-                    const place = placePositions[placeId];
-                    const trans = transPositions[transId];
-                    
-                    const dx = trans.x - place.x;
-                    const dy = trans.y - place.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < placeTransDistance) {
-                        // Move place and transition away from each other
-                        overlapsExist = true;
-                        const angle = Math.atan2(dy, dx);
-                        const moveDistance = (placeTransDistance - distance) / 2;
-                        
-                        place.x -= Math.cos(angle) * moveDistance;
-                        place.y -= Math.sin(angle) * moveDistance;
-                        trans.x += Math.cos(angle) * moveDistance;
-                        trans.y += Math.sin(angle) * moveDistance;
-                    }
-                }
-            }
-        }
-        
-        // Enforce canvas boundaries
-        const margin = placeRadius + 10;
-        
-        for (const id in placePositions) {
-            placePositions[id].x = Math.max(margin, Math.min(canvas.width - margin, placePositions[id].x));
-            placePositions[id].y = Math.max(margin, Math.min(canvas.height - margin, placePositions[id].y));
-        }
-        
-        for (const id in transPositions) {
-            transPositions[id].x = Math.max(margin, Math.min(canvas.width - margin, transPositions[id].x));
-            transPositions[id].y = Math.max(margin, Math.min(canvas.height - margin, transPositions[id].y));
-        }
-    }
-    
-    // Analyze the network to understand its structure
-    function analyzeNetworkStructure() {
-        // Build connection information for each node
-        const nodeConnections = {};
-        
-        // Initialize for all places
-        petriNetData.places.forEach(place => {
-            nodeConnections[place.id] = {
-                id: place.id,
-                type: 'place',
-                inputCount: 0,
-                outputCount: 0,
-                inputs: [],
-                outputs: []
-            };
+    // Add transitions as nodes
+    petriNetData.transitions.forEach(transition => {
+        nodes.push({
+            id: transition.id,
+            name: transition.name || transition.id,
+            type: 'transition'
         });
         
-        // Initialize for all transitions
-        petriNetData.transitions.forEach(transition => {
-            nodeConnections[transition.id] = {
-                id: transition.id,
-                type: 'transition',
-                inputCount: 0,
-                outputCount: 0,
-                inputs: [],
-                outputs: []
-            };
-            
-            // Count place->transition connections
-            transition.from.forEach(placeId => {
-                nodeConnections[transition.id].inputCount++;
-                nodeConnections[transition.id].inputs.push(placeId);
-                
-                if (nodeConnections[placeId]) {
-                    nodeConnections[placeId].outputCount++;
-                    nodeConnections[placeId].outputs.push(transition.id);
-                }
-            });
-            
-            // Count transition->place connections
-            transition.to.forEach(placeId => {
-                nodeConnections[transition.id].outputCount++;
-                nodeConnections[transition.id].outputs.push(placeId);
-                
-                if (nodeConnections[placeId]) {
-                    nodeConnections[placeId].inputCount++;
-                    nodeConnections[placeId].inputs.push(transition.id);
-                }
+        // Add arcs from places to this transition
+        transition.from.forEach(placeId => {
+            links.push({
+                source: placeId,
+                target: transition.id,
+                type: 'input'
             });
         });
         
-        return nodeConnections;
+        // Add arcs from this transition to places
+        transition.to.forEach(placeId => {
+            links.push({
+                source: transition.id,
+                target: placeId,
+                type: 'output',
+                weight: transition.weights ? (transition.weights[placeId] || 1) : 1
+            });
+        });
+    });
+    
+    // Add weights if available in the arcs array
+    if (petriNetData.arcs && petriNetData.arcs.length) {
+        petriNetData.arcs.forEach(arc => {
+            // Find the corresponding link
+            const link = links.find(l => 
+                l.source === arc.source && 
+                l.target === arc.target
+            );
+            
+            if (link) {
+                link.weight = arc.weight || 1;
+            }
+        });
     }
     
-    // Layout nodes based on network structure
-    function layoutNetworkNodes(centerX, centerY) {
-        const nodeConnections = analyzeNetworkStructure();
-        const visited = new Set();
+    // Set up SVG container
+    const container = d3.select('.canvas-container');
+    const containerWidth = container.node().getBoundingClientRect().width;
+    const containerHeight = container.node().getBoundingClientRect().height;
+    
+    // Remove any existing SVG (for redraw)
+    container.select('svg').remove();
+    
+    // Create SVG element
+    const svg = container.append('svg')
+        .attr('width', containerWidth)
+        .attr('height', containerHeight)
+        .attr('id', 'petri-net-svg')
+        .call(d3.zoom().on('zoom', function(event) {
+            g.attr('transform', event.transform);
+        }));
+    
+    // Add a defs section for markers (arrow heads)
+    const defs = svg.append('defs');
+    
+    // Define arrow head for input arcs
+    defs.append('marker')
+        .attr('id', 'input-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 5)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', 'rgba(0, 95, 122, 0.8)');
+    
+    // Define arrow head for output arcs
+    defs.append('marker')
+        .attr('id', 'output-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 5)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', 'rgba(81, 101, 64, 0.8)');
+    
+    // Create a group to contain the entire visualization
+    const g = svg.append('g');
+    
+    // Create the force simulation
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('center', d3.forceCenter(containerWidth / 2, containerHeight / 2))
+        .force('collision', d3.forceCollide().radius(d => d.type === 'place' ? 35 : 25))
+        .force('x', d3.forceX(containerWidth / 2).strength(0.05))
+        .force('y', d3.forceY(containerHeight / 2).strength(0.05));
+    
+    // Create links (arcs)
+    const link = g.append('g')
+        .attr('class', 'links')
+        .selectAll('path')
+        .data(links)
+        .join('path')
+        .attr('class', 'link')
+        .attr('stroke', d => d.type === 'input' ? 'rgba(0, 95, 122, 0.8)' : 'rgba(81, 101, 64, 0.8)')
+        .attr('stroke-width', 2)
+        .attr('fill', 'none')
+        .attr('marker-end', d => d.type === 'input' ? 'url(#input-arrow)' : 'url(#output-arrow)');
+    
+    // Create weight labels
+    const weightLabel = g.append('g')
+        .attr('class', 'weight-labels')
+        .selectAll('g')
+        .data(links.filter(d => d.weight && d.weight !== 1))
+        .join('g');
+    
+    weightLabel.append('circle')
+        .attr('r', 10)
+        .attr('fill', 'rgba(255, 255, 255, 0.8)');
+    
+    weightLabel.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dy', 4)
+        .attr('font-size', 12)
+        .attr('font-weight', 'bold')
+        .attr('fill', '#0a3541')
+        .text(d => d.weight);
+    
+    // Create nodes
+    const node = g.append('g')
+        .attr('class', 'nodes')
+        .selectAll('g')
+        .data(nodes)
+        .join('g')
+        .attr('class', d => `node ${d.type}`)
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended));
+    
+    // Add tooltips
+    node.append('title')
+        .text(d => `${d.id} (${d.name})`);
+    
+    // Add different shapes for places and transitions
+    node.each(function(d) {
+        const element = d3.select(this);
         
-        // Identify starting nodes (those with no inputs or very few)
-        const entryNodes = [];
-        const exitNodes = [];
-        let otherNodes = [];
-        
-        // Find entry and exit points
-        for (const id in nodeConnections) {
-            const node = nodeConnections[id];
-            if (node.type === 'place') {
-                if (node.inputCount === 0) {
-                    entryNodes.push(node);
-                } else if (node.outputCount === 0) {
-                    exitNodes.push(node);
+        if (d.type === 'place') {
+            // Create gradient for places
+            const gradientId = `place-gradient-${d.id.replace(/\s+/g, '-')}`;
+            const gradient = defs.append('radialGradient')
+                .attr('id', gradientId)
+                .attr('cx', '50%')
+                .attr('cy', '50%')
+                .attr('r', '50%')
+                .attr('fx', '50%')
+                .attr('fy', '50%');
+                
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', 'rgba(255, 255, 255, 0.9)');
+                
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', 'rgba(200, 200, 255, 0.7)');
+            
+            // Create place circle
+            element.append('circle')
+                .attr('r', 25)
+                .attr('fill', `url(#${gradientId})`)
+                .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                .attr('stroke-width', 2)
+                .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
+            
+            // Add tokens if any
+            if (d.tokens > 0) {
+                if (d.tokens === 1) {
+                    element.append('circle')
+                        .attr('r', 5)
+                        .attr('fill', 'rgba(0, 95, 122, 0.8)');
                 } else {
-                    otherNodes.push(node);
+                    element.append('text')
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', 5)
+                        .attr('font-size', 14)
+                        .attr('font-weight', 'bold')
+                        .attr('fill', '#0a3541')
+                        .text(d.tokens);
                 }
             }
-        }
-        
-        // If no clear entry/exit, use connection ratio to sort nodes
-        if (entryNodes.length === 0 && exitNodes.length === 0) {
-            otherNodes = Object.values(nodeConnections)
-                .filter(node => node.type === 'place')
-                .sort((a, b) => {
-                    const ratioA = a.outputCount / (a.inputCount || 1);
-                    const ratioB = b.outputCount / (b.inputCount || 1);
-                    return ratioB - ratioA;
-                });
-            
-            // Take a few nodes as entry points
-            if (otherNodes.length > 0) {
-                entryNodes.push(otherNodes.shift());
-            }
-        }
-        
-        // Try to detect if there's a clear flow direction in the network
-        // by starting from entry nodes and traversing
-        const nodeLevels = {};
-        let currentLevel = 0;
-        let currentNodes = [...entryNodes];
-        
-        while (currentNodes.length > 0 && currentLevel < 20) { // Limit levels to prevent infinite loops
-            const nextNodes = [];
-            
-            currentNodes.forEach(node => {
-                // Mark this node's level
-                nodeLevels[node.id] = currentLevel;
-                visited.add(node.id);
-                
-                // Add all unvisited output nodes to the next level
-                node.outputs.forEach(outputId => {
-                    if (!visited.has(outputId) && !currentNodes.some(n => n.id === outputId)) {
-                        const outputNode = nodeConnections[outputId];
-                        if (outputNode) {
-                            nextNodes.push(outputNode);
-                        }
-                    }
-                });
-            });
-            
-            currentNodes = nextNodes;
-            currentLevel++;
-        }
-        
-        // Add any remaining unvisited nodes
-        let remainingNodes = Object.values(nodeConnections).filter(node => !visited.has(node.id));
-        for (const node of remainingNodes) {
-            nodeLevels[node.id] = Math.floor(Math.random() * currentLevel);
-        }
-        
-        // Calculate max nodes per level
-        const nodesPerLevel = {};
-        for (const id in nodeLevels) {
-            const level = nodeLevels[id];
-            nodesPerLevel[level] = (nodesPerLevel[level] || 0) + 1;
-        }
-        
-        // Calculate the max level width to determine spacing
-        const maxNodesInLevel = Math.max(...Object.values(nodesPerLevel));
-        
-        // Determine canvas area to use
-        const width = canvas.width * 0.8;
-        const height = canvas.height * 0.8;
-        const startX = (canvas.width - width) / 2;
-        const startY = (canvas.height - height) / 2;
-        
-        // Calculate node positions based on levels
-        const levelPositions = {};
-        for (const id in nodeLevels) {
-            const level = nodeLevels[id];
-            if (!levelPositions[level]) levelPositions[level] = 0;
-            
-            const node = nodeConnections[id];
-            const nodeType = node.type;
-            
-            // Calculate horizontal position with more spacing
-            const levelWidth = width * 0.9;
-            const horizSpacing = levelWidth / (nodesPerLevel[level] + 1);
-            
-            // Add slight offset to prevent perfect alignment
-            // which can cause overlaps during force-directed layout
-            const offsetX = (Math.random() - 0.5) * 20;
-            const xPos = startX + (levelPositions[level] + 1) * horizSpacing + offsetX;
-            
-            // Calculate vertical position with slight randomization
-            const levelCount = Object.keys(nodesPerLevel).length;
-            const vertSpacing = height / (levelCount);
-            const offsetY = (Math.random() - 0.5) * 20;
-            const yPos = startY + level * vertSpacing + offsetY;
-            
-            // Store position
-            if (nodeType === 'place') {
-                placePositions[id] = { x: xPos, y: yPos };
-            } else {
-                transPositions[id] = { x: xPos, y: yPos };
-            }
-            
-            // Increment position counter for this level
-            levelPositions[level]++;
-        }
-    }
-    
-    // Run force-directed layout to improve node positions
-    function runForceDirectedLayout(centerX, centerY, placeRadius) {
-        const iterations = 80; // More iterations to ensure convergence
-        let repulsionForce = 5000; // Increased repulsion force
-        let attractionForce = 0.05; // Decreased attraction force
-        const nodeDistance = placeRadius * 3; // Minimum distance between nodes
-        const centeringForce = 0.005; // Weaker centering to allow more natural layout
-        
-        // Get all node positions
-        const allNodes = [];
-        for (const id in placePositions) {
-            allNodes.push({
-                id: id,
-                type: 'place',
-                x: placePositions[id].x,
-                y: placePositions[id].y,
-                dx: 0,
-                dy: 0,
-                fixed: false
-            });
-        }
-        
-        for (const id in transPositions) {
-            allNodes.push({
-                id: id,
-                type: 'transition',
-                x: transPositions[id].x,
-                y: transPositions[id].y,
-                dx: 0,
-                dy: 0,
-                fixed: false
-            });
-        }
-        
-        // Create connections list for force calculation
-        const connections = [];
-        petriNetData.transitions.forEach(transition => {
-            // Place -> Transition connections
-            transition.from.forEach(placeId => {
-                connections.push({
-                    source: placeId,
-                    target: transition.id
-                });
-            });
-            
-            // Transition -> Place connections
-            transition.to.forEach(placeId => {
-                connections.push({
-                    source: transition.id,
-                    target: placeId
-                });
-            });
-        });
-        
-        // Run force-directed layout
-        for (let iter = 0; iter < iterations; iter++) {
-            // Reset forces
-            allNodes.forEach(node => {
-                node.dx = 0;
-                node.dy = 0;
-            });
-            
-            // Apply repulsive forces between all node pairs
-            for (let i = 0; i < allNodes.length; i++) {
-                for (let j = i + 1; j < allNodes.length; j++) {
-                    const nodeA = allNodes[i];
-                    const nodeB = allNodes[j];
-                    
-                    if (nodeA.fixed && nodeB.fixed) continue;
-                    
-                    const dx = nodeA.x - nodeB.x;
-                    const dy = nodeA.y - nodeB.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-                    
-                    // Extra repulsion for same-type nodes
-                    let sameTypeMultiplier = 1.0;
-                    if (nodeA.type === nodeB.type) {
-                        sameTypeMultiplier = 2.5; // Much stronger repulsion for nodes of same type
-                        
-                        // Even stronger repulsion for places
-                        if (nodeA.type === 'place') {
-                            sameTypeMultiplier = 3.0;
-                        }
-                    }
-                    
-                    // Stronger repulsion at close distances
-                    const distanceMultiplier = Math.max(1, 5 * Math.pow(nodeDistance / Math.max(distance, 1), 2));
-                    
-                    // Calculate repulsion force (inverse square law)
-                    const force = repulsionForce * sameTypeMultiplier * distanceMultiplier / (distance * distance);
-                    
-                    // Apply force with adjustment for fixed nodes
-                    const unitX = dx / distance;
-                    const unitY = dy / distance;
-                    
-                    if (!nodeA.fixed) {
-                        nodeA.dx += unitX * force;
-                        nodeA.dy += unitY * force;
-                    }
-                    
-                    if (!nodeB.fixed) {
-                        nodeB.dx -= unitX * force;
-                        nodeB.dy -= unitY * force;
-                    }
-                }
-            }
-            
-            // Apply attractive forces along edges
-            connections.forEach(conn => {
-                const sourceNode = allNodes.find(n => n.id === conn.source);
-                const targetNode = allNodes.find(n => n.id === conn.target);
-                
-                if (!sourceNode || !targetNode) return;
-                if (sourceNode.fixed && targetNode.fixed) return;
-                
-                const dx = targetNode.x - sourceNode.x;
-                const dy = targetNode.y - sourceNode.y;
-                const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-                
-                // Only pull nodes if distance is too great
-                if (distance > nodeDistance * 3) {
-                    // Force based on distance from ideal length
-                    const force = (distance - nodeDistance) * attractionForce;
-                    
-                    // Apply force
-                    const unitX = dx / distance;
-                    const unitY = dy / distance;
-                    
-                    if (!sourceNode.fixed) {
-                        sourceNode.dx += unitX * force;
-                        sourceNode.dy += unitY * force;
-                    }
-                    
-                    if (!targetNode.fixed) {
-                        targetNode.dx -= unitX * force;
-                        targetNode.dy -= unitY * force;
-                    }
-                }
-            });
-            
-            // Apply centering force and boundary forces
-            allNodes.forEach(node => {
-                if (node.fixed) return;
-                
-                // Pull toward center if too far
-                const dx = centerX - node.x;
-                const dy = centerY - node.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > canvas.width * 0.4) {
-                    node.dx += dx * centeringForce;
-                    node.dy += dy * centeringForce;
-                }
-                
-                // Boundary forces
-                const margin = 50;
-                if (node.x < margin) node.dx += 5;
-                if (node.x > canvas.width - margin) node.dx -= 5;
-                if (node.y < margin) node.dy += 5;
-                if (node.y > canvas.height - margin) node.dy -= 5;
-            });
-            
-            // Update positions with damping
-            const damping = 0.9;
-            allNodes.forEach(node => {
-                if (node.fixed) return;
-                
-                // Apply the accumulated forces with damping
-                node.x += node.dx * damping;
-                node.y += node.dy * damping;
-                
-                // Ensure within canvas bounds
-                node.x = Math.max(50, Math.min(canvas.width - 50, node.x));
-                node.y = Math.max(50, Math.min(canvas.height - 50, node.y));
-                
-                // Update the actual position objects
-                if (node.type === 'place') {
-                    placePositions[node.id] = { x: node.x, y: node.y };
-                } else {
-                    transPositions[node.id] = { x: node.x, y: node.y };
-                }
-            });
-            
-            // Gradually reduce forces over time for better convergence
-            repulsionForce *= 0.99;
-            attractionForce *= 1.005;
-        }
-    }
-    
-    // Draw all places
-    function drawPlaces(ctx, placeRadius) {
-        petriNetData.places.forEach(place => {
-            const {x, y} = placePositions[place.id];
-            
-            // Draw circle with gradient fill
-            ctx.beginPath();
-            ctx.arc(x, y, placeRadius, 0, 2 * Math.PI);
-            
-            // Create gradient for place
-            const gradient = ctx.createRadialGradient(x, y, 0, x, y, placeRadius);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-            gradient.addColorStop(1, 'rgba(200, 200, 255, 0.7)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            
-            // Add shadow for depth
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 5;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            
-            ctx.strokeStyle = 'rgba(0, 95, 122, 0.8)';
-            ctx.stroke();
-            
-            // Reset shadow for text
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            
-            // Draw place name
-            ctx.fillStyle = '#0a3541';
-            ctx.fillText(place.id, x - 10, y - placeRadius - 5);
-            
-            // Draw tokens
-            if (place.tokens > 0) {
-                if (place.tokens == 1) {
-                    // Single token as dot
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'rgba(0, 95, 122, 0.8)';
-                    ctx.fill();
-                } else {
-                    // Multiple tokens as number
-                    ctx.fillStyle = '#0a3541';
-                    ctx.font = 'bold 14px "Nunito", sans-serif';
-                    ctx.fillText(place.tokens.toString(), x - 5, y + 5);
-                    ctx.font = '14px "Nunito", sans-serif';
-                }
-            }
-        });
-    }
-    
-    // Draw all transitions
-    function drawTransitions(ctx) {
-        petriNetData.transitions.forEach(transition => {
-            const {x, y} = transPositions[transition.id];
-            
-            // Draw rectangle with gradient fill
-            const width = 30;
-            const height = 20;
-            
-            // Add shadow for depth
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 5;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            
-            // Create gradient for transition
-            const gradient = ctx.createLinearGradient(x - width/2, y - height/2, x + width/2, y + height/2);
-            gradient.addColorStop(0, 'rgba(81, 101, 64, 0.8)');
-            gradient.addColorStop(1, 'rgba(81, 101, 64, 0.6)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(x - width/2, y - height/2, width, height);
-            
-            ctx.strokeStyle = 'rgba(81, 101, 64, 0.9)';
-            ctx.strokeRect(x - width/2, y - height/2, width, height);
-            
-            // Reset shadow for text
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            
-            // Draw transition name
-            ctx.fillStyle = '#0a3541';
-            ctx.fillText(transition.id, x - 10, y - height - 5);
-        });
-    }
-    
-    // Draw all connections with minimal crossing
-    function drawConnections(ctx, placeRadius) {
-        if (petriNetData.arcs && petriNetData.arcs.length > 0) {
-            // Use arcs data directly
-            petriNetData.arcs.forEach(arc => {
-                drawSingleArc(ctx, arc, placeRadius);
-            });
         } else {
-            // Fallback to inferring arcs from transitions
-            petriNetData.transitions.forEach(transition => {
-                const transPos = transPositions[transition.id];
+            // Create gradient for transitions
+            const gradientId = `transition-gradient-${d.id.replace(/\s+/g, '-')}`;
+            const gradient = defs.append('linearGradient')
+                .attr('id', gradientId)
+                .attr('x1', '0%')
+                .attr('y1', '0%')
+                .attr('x2', '100%')
+                .attr('y2', '100%');
                 
-                if (transPos) {
-                    // Draw input arcs (from places to transitions)
-                    transition.from.forEach(placeId => {
-                        const placePos = placePositions[placeId];
-                        if (placePos) {
-                            ctx.strokeStyle = 'rgba(0, 95, 122, 0.8)';
-                            ctx.fillStyle = 'rgba(0, 95, 122, 0.8)';
-                            drawBestArc(ctx, placePos, transPos, placeRadius, 15, true);
-                        }
-                    });
-                    
-                    // Draw output arcs (from transitions to places)
-                    transition.to.forEach(placeId => {
-                        const placePos = placePositions[placeId];
-                        if (placePos) {
-                            ctx.strokeStyle = 'rgba(81, 101, 64, 0.8)';
-                            ctx.fillStyle = 'rgba(81, 101, 64, 0.8)';
-                            drawBestArc(ctx, transPos, placePos, 15, placeRadius, false);
-                        }
-                    });
-                }
-            });
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', 'rgba(81, 101, 64, 0.8)');
+                
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', 'rgba(81, 101, 64, 0.6)');
+            
+            // Create transition rectangle
+            element.append('rect')
+                .attr('x', -15)
+                .attr('y', -10)
+                .attr('width', 30)
+                .attr('height', 20)
+                .attr('fill', `url(#${gradientId})`)
+                .attr('stroke', 'rgba(81, 101, 64, 0.9)')
+                .attr('stroke-width', 2)
+                .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
         }
+        
+        // Add label
+        element.append('text')
+            .attr('dy', d => d.type === 'place' ? -30 : -15)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#0a3541')
+            .text(d.id);
+    });
+    
+    // Helper function to calculate a point along a quadratic Bezier curve
+    function pointOnQuadraticBezier(p0, p1, p2, t) {
+        const x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
+        const y = (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y;
+        return { x, y };
     }
     
-    // Draw a single arc
-    function drawSingleArc(ctx, arc, placeRadius) {
-        const sourceId = arc.source;
-        const targetId = arc.target;
-        const weight = arc.weight || "1";
-        
-        let sourcePos, targetPos;
-        
-        // Find positions based on source/target types
-        if (arc.type === "input") {
-            // Input arc: place → transition
-            sourcePos = placePositions[sourceId];
-            targetPos = transPositions[targetId];
-        } else {
-            // Output arc: transition → place
-            sourcePos = transPositions[sourceId];
-            targetPos = placePositions[targetId];
-        }
-        
-        if (sourcePos && targetPos) {
-            // Set colors
-            ctx.strokeStyle = arc.type === "input" ? 'rgba(0, 95, 122, 0.8)' : 'rgba(81, 101, 64, 0.8)';
-            ctx.fillStyle = ctx.strokeStyle;
+    // Update link positions during simulation
+    simulation.on('tick', () => {
+        // Update links with curved paths
+        link.attr('d', d => {
+            // Get source and target coordinates
+            const sourceNode = nodes.find(n => n.id === d.source.id || n.id === d.source);
+            const targetNode = nodes.find(n => n.id === d.target.id || n.id === d.target);
             
-            // Draw the arc
-            drawBestArc(ctx, sourcePos, targetPos, 
-                       arc.type === "input" ? placeRadius : 15, 
-                       arc.type === "input" ? 15 : placeRadius,
-                       arc.type === "input");
+            if (!sourceNode || !targetNode) return '';
             
-            // Draw weight label if > 1
-            if (weight !== "1") {
-                const midX = (sourcePos.x + targetPos.x) / 2;
-                const midY = (sourcePos.y + targetPos.y) / 2;
-                
-                // Add background for better readability
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.beginPath();
-                ctx.arc(midX, midY, 10, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Draw weight text
-                ctx.fillStyle = '#0a3541';
-                ctx.font = 'bold 14px "Nunito", sans-serif';
-                ctx.fillText(weight, midX - 4, midY + 4);
-                ctx.font = '14px "Nunito", sans-serif';
+            // Extract coordinates
+            const sourceX = sourceNode.x;
+            const sourceY = sourceNode.y;
+            const targetX = targetNode.x;
+            const targetY = targetNode.y;
+            
+            // Calculate midpoint
+            const midX = (sourceX + targetX) / 2;
+            const midY = (sourceY + targetY) / 2;
+            
+            // Calculate distance
+            const dx = targetX - sourceX;
+            const dy = targetY - sourceY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Adjust curvature based on distance
+            let curvature = 0;
+            if (distance > 150) {
+                curvature = 0.2;
+            } else if (distance > 80) {
+                curvature = 0.1;
             }
+            
+            // Calculate control point offset perpendicular to the line
+            const offsetX = -dy * curvature;
+            const offsetY = dx * curvature;
+            
+            // Calculate control point
+            const controlX = midX + offsetX;
+            const controlY = midY + offsetY;
+            
+            // Start and end nodes have different radii
+            const sourceRadius = sourceNode.type === 'place' ? 25 : 15;
+            const targetRadius = targetNode.type === 'place' ? 25 : 15;
+            
+            // Calculate the angle to adjust start and end points
+            const angle = Math.atan2(targetY - sourceY, targetX - sourceX);
+            
+            // Adjust start and end points to begin/end at the node perimeter
+            const startX = sourceX + (sourceRadius * Math.cos(angle));
+            const startY = sourceY + (sourceRadius * Math.sin(angle));
+            
+            // For the target, we need to move inward from the edge a bit to accommodate the arrowhead
+            const endX = targetX - ((targetRadius + 5) * Math.cos(angle));
+            const endY = targetY - ((targetRadius + 5) * Math.sin(angle));
+            
+            // Store path parameters on the data for weight label positioning
+            d.pathParams = {
+                start: { x: startX, y: startY },
+                control: { x: controlX, y: controlY },
+                end: { x: endX, y: endY }
+            };
+            
+            // Generate curved path
+            return `M${startX},${startY} Q${controlX},${controlY} ${endX},${endY}`;
+        });
+        
+        // Update weight labels - FIXED to be on the curve
+        weightLabel.attr('transform', d => {
+            // If we don't have path parameters yet, skip
+            if (!d.pathParams) return '';
+            
+            // Calculate point on the Bezier curve at t=0.5 (midpoint)
+            const bezierPoint = pointOnQuadraticBezier(
+                d.pathParams.start, 
+                d.pathParams.control, 
+                d.pathParams.end, 
+                0.5
+            );
+            
+            return `translate(${bezierPoint.x}, ${bezierPoint.y})`;
+        });
+        
+        // Update node positions
+        node.attr('transform', d => `translate(${d.x}, ${d.y})`);
+    });
+    
+    // Drag functions
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+    
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+    
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        // Keep node fixed where user dragged it
+        // d.fx = null;
+        // d.fy = null;
+    }
+    
+    // Add legend
+    const legendWidth = 120;
+    const legendHeight = 140;
+    const legendX = containerWidth - legendWidth - 10;
+    const legendY = 10;
+    
+    const legend = svg.append('g')
+        .attr('class', 'legend')
+        .attr('transform', `translate(${legendX}, ${legendY})`);
+    
+    // Legend background
+    legend.append('rect')
+        .attr('width', legendWidth)
+        .attr('height', legendHeight)
+        .attr('rx', 8)
+        .attr('ry', 8)
+        .attr('fill', 'rgba(255, 255, 255, 0.9)')
+        .attr('stroke', 'rgba(0, 0, 0, 0.1)');
+    
+    // Legend title
+    legend.append('text')
+        .attr('x', 10)
+        .attr('y', 20)
+        .attr('font-size', 12)
+        .attr('font-weight', 'bold')
+        .attr('fill', '#0a3541')
+        .text('Legend');
+    
+    // Place legend item
+    const placeLegend = legend.append('g')
+        .attr('transform', 'translate(15, 40)');
+    
+    placeLegend.append('circle')
+        .attr('r', 10)
+        .attr('fill', 'rgba(200, 200, 255, 0.7)')
+        .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+        .attr('stroke-width', 2);
+    
+    placeLegend.append('text')
+        .attr('x', 20)
+        .attr('y', 4)
+        .attr('font-size', 12)
+        .attr('fill', '#0a3541')
+        .text('Place');
+    
+    // Transition legend item
+    const transitionLegend = legend.append('g')
+        .attr('transform', 'translate(15, 70)');
+    
+    transitionLegend.append('rect')
+        .attr('x', -10)
+        .attr('y', -7)
+        .attr('width', 20)
+        .attr('height', 14)
+        .attr('fill', 'rgba(81, 101, 64, 0.8)')
+        .attr('stroke', 'rgba(81, 101, 64, 0.9)')
+        .attr('stroke-width', 2);
+    
+    transitionLegend.append('text')
+        .attr('x', 20)
+        .attr('y', 4)
+        .attr('font-size', 12)
+        .attr('fill', '#0a3541')
+        .text('Transition');
+    
+    // Input arc legend item
+    const inputArcLegend = legend.append('g')
+        .attr('transform', 'translate(15, 100)');
+    
+    inputArcLegend.append('line')
+        .attr('x1', -10)
+        .attr('y1', 0)
+        .attr('x2', 10)
+        .attr('y2', 0)
+        .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+        .attr('stroke-width', 2)
+        .attr('marker-end', 'url(#input-arrow)');
+    
+    inputArcLegend.append('text')
+        .attr('x', 20)
+        .attr('y', 4)
+        .attr('font-size', 12)
+        .attr('fill', '#0a3541')
+        .text('Input Arc');
+    
+    // Output arc legend item
+    const outputArcLegend = legend.append('g')
+        .attr('transform', 'translate(15, 130)');
+    
+    outputArcLegend.append('line')
+        .attr('x1', -10)
+        .attr('y1', 0)
+        .attr('x2', 10)
+        .attr('y2', 0)
+        .attr('stroke', 'rgba(81, 101, 64, 0.8)')
+        .attr('stroke-width', 2)
+        .attr('marker-end', 'url(#output-arrow)');
+    
+    outputArcLegend.append('text')
+        .attr('x', 20)
+        .attr('y', 4)
+        .attr('font-size', 12)
+        .attr('fill', '#0a3541')
+        .text('Output Arc');
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        // Get new dimensions
+        const newWidth = container.node().getBoundingClientRect().width;
+        const newHeight = container.node().getBoundingClientRect().height;
+        
+        // Update SVG size
+        svg.attr('width', newWidth)
+           .attr('height', newHeight);
+        
+        // Update forces
+        simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
+                 .force('x', d3.forceX(newWidth / 2).strength(0.05))
+                 .force('y', d3.forceY(newHeight / 2).strength(0.05))
+                 .alpha(0.3)
+                 .restart();
+        
+        // Move legend
+        legend.attr('transform', `translate(${newWidth - legendWidth - 10}, 10)`);
+    });
+    
+    // Add CSS styles for D3 elements
+    const style = document.createElement('style');
+    style.textContent = `
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
         }
-    }
-    
-    // Determine best arc drawing method based on positions
-    function drawBestArc(ctx, source, target, sourceRadius, targetRadius, isInput) {
-        const dx = target.x - source.x;
-        const dy = target.y - source.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // For very short distances, draw straight line
-        if (distance < 100) {
-            drawStraightArrow(ctx, source.x, source.y, target.x, target.y, sourceRadius, targetRadius);
-        } 
-        // For medium distances, use gentle curve
-        else if (distance < 200) {
-            const curveFactor = 0.1;
-            drawCurvedArrow(ctx, source.x, source.y, target.x, target.y, sourceRadius, targetRadius, curveFactor);
+        #petri-net-svg {
+            background-color: transparent;
+            cursor: move;
         }
-        // For long distances, use more pronounced curve
-        else {
-            const curveFactor = 0.2;
-            drawCurvedArrow(ctx, source.x, source.y, target.x, target.y, sourceRadius, targetRadius, curveFactor);
+        
+        .node {
+            cursor: pointer;
         }
-    }
-    
-    // Draw straight arrow
-    function drawStraightArrow(ctx, fromX, fromY, toX, toY, sourceRadius, targetRadius) {
-        const headLength = 10;
-        const dx = toX - fromX;
-        const dy = toY - fromY;
-        const angle = Math.atan2(dy, dx);
         
-        // Adjust start and end points for node sizes
-        const startX = fromX + (sourceRadius * Math.cos(angle));
-        const startY = fromY + (sourceRadius * Math.sin(angle));
+        .node:hover text {
+            font-weight: bold;
+        }
         
-        const endX = toX - (targetRadius * Math.cos(angle));
-        const endY = toY - (targetRadius * Math.sin(angle));
-        
-        // Add shadow
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-        ctx.shadowBlur = 3;
-        
-        // Draw the line
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-        
-        // Draw the arrow head
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(
-            endX - headLength * Math.cos(angle - Math.PI/6), 
-            endY - headLength * Math.sin(angle - Math.PI/6)
-        );
-        ctx.lineTo(
-            endX - headLength * Math.cos(angle + Math.PI/6), 
-            endY - headLength * Math.sin(angle + Math.PI/6)
-        );
-        ctx.closePath();
-        ctx.fill();
-        
-        // Reset shadow
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-    }
-    
-    // Draw curved arrow
-    function drawCurvedArrow(ctx, fromX, fromY, toX, toY, sourceRadius, targetRadius, curveFactor = 0.2) {
-        const headLength = 10;
-        const dx = toX - fromX;
-        const dy = toY - fromY;
-        const angle = Math.atan2(dy, dx);
-        
-        // Adjust start and end points for node sizes
-        const startX = fromX + (sourceRadius * Math.cos(angle));
-        const startY = fromY + (sourceRadius * Math.sin(angle));
-        
-        const endX = toX - (targetRadius * Math.cos(angle));
-        const endY = toY - (targetRadius * Math.sin(angle));
-        
-        // Add shadow
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-        ctx.shadowBlur = 3;
-        
-        // Draw the curved line
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        
-        // Calculate control point for curve
-        const midX = (startX + endX) / 2;
-        const midY = (startY + endY) / 2;
-        
-        // Perpendicular offset - controlled by curveFactor
-        const controlX = midX - dy * curveFactor;
-        const controlY = midY + dx * curveFactor;
-        
-        ctx.moveTo(startX, startY);
-        ctx.quadraticCurveTo(controlX, controlY, endX, endY);
-        ctx.stroke();
-        
-        // Calculate tangent at the end point for the arrow head
-        const tangentX = endX - controlX;
-        const tangentY = endY - controlY;
-        const tangentAngle = Math.atan2(tangentY, tangentX);
-        
-        // Draw the arrow head aligned with the curve
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(
-            endX - headLength * Math.cos(tangentAngle - Math.PI/6), 
-            endY - headLength * Math.sin(tangentAngle - Math.PI/6)
-        );
-        ctx.lineTo(
-            endX - headLength * Math.cos(tangentAngle + Math.PI/6), 
-            endY - headLength * Math.sin(tangentAngle + Math.PI/6)
-        );
-        ctx.closePath();
-        ctx.fill();
-        
-        // Reset shadow
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-    }
-    
-    // Draw legend
-    function drawLegend(ctx, canvasWidth, canvasHeight) {
-        const spacing = 30;
-        const labelOffset = 30;
-        const fontSize = 12;
-        
-        // Calculate legend dimensions
-        const legendWidth = 120;
-        const legendHeight = 140;
-        const legendPadding = 10;
-        
-        // Position in the top-right corner
-        const x = canvasWidth - legendWidth - legendPadding;
-        const y = legendPadding;
-        
-        // Legend background
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-        ctx.lineWidth = 1;
-        
-        ctx.beginPath();
-        ctx.roundRect(x, y, legendWidth, legendHeight, 8);
-        ctx.fill();
-        ctx.stroke();
-        
-        // Draw legend title
-        ctx.fillStyle = '#0a3541';
-        ctx.font = `bold ${fontSize}px "Nunito", sans-serif`;
-        ctx.fillText('Legend', x + 10, y + 20);
-        ctx.font = `${fontSize}px "Nunito", sans-serif`;
-        
-        // Place legend
-        let itemY = y + 40;
-        let itemX = x + 15;
-        
-        ctx.beginPath();
-        ctx.arc(itemX, itemY, 10, 0, 2 * Math.PI);
-        const gradient1 = ctx.createRadialGradient(itemX, itemY, 0, itemX, itemY, 10);
-        gradient1.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-        gradient1.addColorStop(1, 'rgba(200, 200, 255, 0.7)');
-        ctx.fillStyle = gradient1;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0, 95, 122, 0.8)';
-        ctx.stroke();
-        
-        ctx.fillStyle = '#0a3541';
-        ctx.fillText('Place', itemX + labelOffset - 10, itemY + 4);
-        
-        // Transition legend
-        itemY += spacing;
-        const width = 20, height = 14;
-        
-        const gradient2 = ctx.createLinearGradient(itemX - width/2, itemY - height/2, itemX + width/2, itemY + height/2);
-        gradient2.addColorStop(0, 'rgba(81, 101, 64, 0.8)');
-        gradient2.addColorStop(1, 'rgba(81, 101, 64, 0.6)');
-        
-        ctx.fillStyle = gradient2;
-        ctx.fillRect(itemX - width/2, itemY - height/2, width, height);
-        
-        ctx.strokeStyle = 'rgba(81, 101, 64, 0.9)';
-        ctx.strokeRect(itemX - width/2, itemY - height/2, width, height);
-        
-        ctx.fillStyle = '#0a3541';
-        ctx.fillText('Transition', itemX + labelOffset - 10, itemY + 4);
-        
-        // Input arc legend
-        itemY += spacing;
-        ctx.beginPath();
-        ctx.moveTo(itemX - 10, itemY);
-        ctx.lineTo(itemX + 10, itemY);
-        ctx.strokeStyle = 'rgba(0, 95, 122, 0.8)';
-        ctx.stroke();
-        
-        // Arrow head
-        ctx.beginPath();
-        ctx.moveTo(itemX + 10, itemY);
-        ctx.lineTo(itemX + 5, itemY - 5);
-        ctx.lineTo(itemX + 5, itemY + 5);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(0, 95, 122, 0.8)';
-        ctx.fill();
-        
-        ctx.fillStyle = '#0a3541';
-        ctx.fillText('Input Arc', itemX + labelOffset - 10, itemY + 4);
-        
-        // Output arc legend
-        itemY += spacing;
-        ctx.beginPath();
-        ctx.moveTo(itemX - 10, itemY);
-        ctx.lineTo(itemX + 10, itemY);
-        ctx.strokeStyle = 'rgba(81, 101, 64, 0.8)';
-        ctx.stroke();
-        
-        // Arrow head
-        ctx.beginPath();
-        ctx.moveTo(itemX + 10, itemY);
-        ctx.lineTo(itemX + 5, itemY - 5);
-        ctx.lineTo(itemX + 5, itemY + 5);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(81, 101, 64, 0.8)';
-        ctx.fill();
-        
-        ctx.fillStyle = '#0a3541';
-        ctx.fillText('Output Arc', itemX + labelOffset - 10, itemY + 4);
-    }
+        .link {
+            pointer-events: none;
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
+
 {% endblock %}
 
 <!-- Right side of the header -->
