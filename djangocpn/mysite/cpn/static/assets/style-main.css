@@ -1,0 +1,157 @@
+:root {
+    --dark: rgb(48, 48, 48);
+    --mercRed: #85262b;
+    --mercGreen: #516540;
+    --mercBlue: #005f7a;
+    --mercBlueRGBA: rgba(0, 95, 122, 0.4);
+    --mercOrange: #dc9018;
+    --mercWhite: rgba(255, 255, 255, 0.7);
+    --mercFont: "Nunito";
+}
+html {
+    transition: all 0.3s;
+}
+
+
+#archDiv {
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 100%;
+
+    transition: all 0.3s;
+}
+
+#cDiv{
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    position: fixed;
+    bottom: 0px;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    transition: all 0.3s;
+}
+
+.flexColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+#fC1 {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    /* Removed align items center because of issues */
+    justify-content: center; /* Default center alignment */
+    gap: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.flexRow {
+    transition: all 0.5s;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fromRight {
+    0% {
+        transform: translateX(150px);
+    }
+
+    100% {
+        transform: translateX(0px);
+    }
+}
+
+@keyframes fromUnder {
+    0% {
+        transform: translateY(150px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.itemButton {
+    border: 4px solid black;
+    border-radius: 5px;
+    margin-top: 25px;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.itemButton:hover {
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.671);
+}
+
+#fR1 {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+}
+
+@media (max-width: 569px) {
+   .closeButton {
+        width: 100%;
+        text-align: center;
+    }
+
+    #detailsWindowTitle{
+        text-align: center;
+    }
+
+}
+
+@media (max-width: 790px) {
+    #itemPreviewImage {
+        width: 500px;
+    }
+
+}
+
+@media (max-width: 1170px) {
+    #centerHeaderText {
+        display: none;
+    }
+}
+
+@media (max-width: 650px){
+    #accountWindow{
+        right: 170px;
+    }
+}
+/* Copyright© Aron Särkioja to DIGIT, Inc. 2025. All rights reserved. */

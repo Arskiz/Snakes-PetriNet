@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html id="html" lang="en">
+
+    <head class="ui-page">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- Page Title and Favicon -->
+        <title>{% block pageTitle %} {% endblock %}</title>
+        <link rel="icon" type="image/png" href="{{ static('assets/icons/favicon.png') }}">
+        
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap" rel="stylesheet">
+        
+        <!-- CSS Libraries -->
+        <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="{{ static('assets/style-shared.css') }}">
+        <link rel="stylesheet" href="{{ static('assets/style-main.css') }}">
+        {% block head %} {% endblock %}
+        
+        <!-- JavaScript Libraries -->
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    </head>
+
+    <body id="body">
+        <!-- Header Section -->
+        <header id="header">
+            <!-- Left side of the header -->
+            <div id="HeaderLeft">
+                <div title="Redirect to DIGIT"
+                    style="margin-left: 15px"
+                    class="Hoverable"
+                    onclick="redirect(0)"
+                    {% block title %} title="HeaderLeftTitle" {% endblock %}>
+                    <img
+                        src="{{ static('assets/icons/TUC.png') }}"
+                        alt="Mercantec Logo" width="200px">
+                </div>
+            </div>
+
+            <h1 id="centerHeaderText" class="white Titles">Snakes CPN Viewer</h1>
+
+            <!-- Right side of the header -->
+            <div id="HeaderRight">
+                <div id="HeaderRightNonHamburger">
+                    {% block rightHeaderContent %}
+                    
+                    {% endblock %}
+                </div>
+                <div id="HeaderRightHamburger" class="Hoverable">
+                    <img id="HamburgerBTNImg"
+                        src="{{ static('assets/icons/hamburger.svg') }}"
+                        alt="hamburger-icon"
+                        style="filter:invert(100%)" width="50px">
+                </div>
+            </div>
+        </header>
+        {% block archDiv %}
+        <div id="archDiv">
+        {% endblock %}
+            {% block fr1 %}
+            <div id="fR1">
+            {% endblock %}
+                {% block contentParent %}
+                <div id="content">
+                {% endblock %}
+                    {% block content %} {% endblock %}
+                </div>
+                <div id="HamburgerContent" style="display:none">
+                    <div style="margin-top: 5px;">
+                        <p class="white pText textAlignCenter"
+                            style="font-size: 50px;">
+                            Menu
+                        </p>
+
+                        <div class="lineLonger"
+                            style="margin-bottom: 10px;"></div>
+                    </div>
+                    <div class="flexColumn"
+                        style="justify-content:space-between; align-items:center; width:100%; height: 100%;">
+                        <div class="flexColumn"
+                            style="justify-content:space-between; align-items:center; width:100%">
+
+                            <button class="Hoverable buttonBNR nonSelectable"
+                                onclick="{% block burger1 %} {% endblock %}"
+                                style="margin-bottom: 5px;width:95%">
+                                <p class="pText black" style="font-size: 30px;">
+                                    {% block burger1Text %} {% endblock %}
+                                </p>
+                            </button>
+
+                            <button class="Hoverable buttonBNR nonSelectable"
+                                onclick="{% block burger2 %} {% endblock %}"
+                                style="margin-bottom: 5px;width:95%">
+                                <p class="pText black" style="font-size: 30px;">
+                                    {% block burger2Text %} {% endblock %}
+                                </p>
+                            </button>
+                        </div>
+
+                        <div class="flexRow"
+                            style="align-items:center;justify-content:center">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer id="footer">
+            <div id="innerFooter">
+                <p id="footerText" class="white pText textAlignCenter">
+                    {% block footerTxt %} {% endblock %}
+                </p>
+            </div>
+        </footer>
+
+        <div id="blurOverlay" class="blurCard hidden2"></div>
+        <canvas id="canvas"></canvas>
+    {% block beforeBodyEnd %} {% endblock %}
+    </body>
+    <script src="{{ static('assets/scripts/js.js') }}"></script>
+
+    <!-- Canvas -->
+    {% block canvas %} {% endblock %}
+
+</html>

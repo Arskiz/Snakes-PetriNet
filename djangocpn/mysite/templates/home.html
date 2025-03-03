@@ -1,0 +1,188 @@
+{# cpn/templates/net.html #}
+{% extends 'base.html' %}
+
+{% block pageTitle %}
+Snakes CPN Viewer
+{% endblock %}
+
+{% block archDiv %}
+<div id="cDiv">
+{% endblock %}
+
+{% block fr1 %}
+<div class="mainPageContent">
+{% endblock %}
+
+{% block contentParent %}
+<div id="content" class="mainPageContent">
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <img
+        src="{{ static('assets/icons/upload-big.png') }}"
+        class="conChild Hoverable cardUploadImg" height="150px" width="150px" id="Upload-Icon"
+        onclick="$('#popupDialog').popup('open');"
+        alt="home-icon-btn">
+        
+        <p class="card-text black text-center">Upload a file using the button below to start analyzing the Petri net.</p>
+        <div id="supTypes" class="flexRow">
+            <p class="conChild black text-center">
+                Supported file types:
+            </p>
+            <img
+            src="{{ static('assets/icons/python-file.png') }}"
+            class="conChild" height="25px" id="Python-Icon"
+            title="Python"
+            alt="python-icon">
+        </div>
+        <button class="mainUploadBTN Hoverable buttonBNR nonSelectable" onclick="$('#popupDialog').popup('open');" style="width: 95%; margin-top: 20px;">
+            <p class="white text-center" style="font-size: 30px;">Upload File</p>
+        </button>
+    </div>
+{% endblock %}
+
+<!-- Right side of the header -->
+{% block rightHeaderContent %}
+
+<!-- Import a file -painike -->
+<div class="Hoverable" style="margin-right:10px" id="HomeBtn" onclick="$('#popupDialog').popup('open');">
+    <h1 class="nonSelectable white conChild HeaderElementText">Upload a file</h1>
+    <img
+        src="{{ static('assets/icons/upload.png') }}"
+        class="conChild" height="25px" id="Upload-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
+</div>
+
+<!-- Pop-up dialog for file selection -->
+<div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="a" data-dismissible="false" class="file-upload-popup">
+    <div class="popup-header">
+        <h3>Upload Petri Net File</h3>
+        <button class="close-button" onclick="window.location.href = '#'" data-rel="back">×</button>
+    </div>
+    
+    <div class="popup-content">
+        <p>Select a CPN file to analyze.</p>
+        
+        <form id="fileUploadForm" method="POST" enctype="multipart/form-data">
+            <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+            
+            <div class="file-input-container">
+                <input type="file" accept=".py" id="fileInput" name="file" onchange="updateFileName()" />
+                <label for="fileInput" class="file-input-label">
+                    <span class="file-icon">📁</span>
+                    <span>Choose File</span>
+                </label>
+                <p id="fileName" class="selected-filename"></p>
+            </div>
+            
+            <div class="popup-actions">
+                <button type="button" onclick="window.location.href = '#'" class="popup-button secondary" data-rel="back">Cancel</button>
+                <button type="button" class="popup-button primary" onclick="uploadFile()">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Skriptit -->
+<script>
+    function updateFileName() {
+        var input = document.getElementById('fileInput');
+        var fileName = document.getElementById('fileName');
+        if (input.files.length > 0) {
+            fileName.innerText = "Selected: " + input.files[0].name;
+        } else {
+            fileName.innerText = "";
+        }
+    }
+
+    function uploadFile() {
+        var input = document.getElementById('fileInput');
+        if (input.files.length === 0) {
+            alert("No file selected!");
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('file', input.files[0]);
+
+        
+        var csrfToken = document.getElementById('csrf_token').value;
+
+        // Lähetetään POST-pyyntö Djangon näkymään
+        fetch("{{ url('upload_file') }}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("File uploaded successfully! Redirecting now..");
+                $('#popupDialog').popup('close'); // Sulje pop-up
+                
+                if (data.redirect_url) {
+                    // If there's a redirect URL, navigate to it
+                    window.location.href = data.redirect_url;
+                }
+            } else {
+                alert("Upload failed: " + (data.error || data.message || "Unknown error"));
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>
+
+
+
+<div class="Hoverable" id="HomeBtn" onclick="redirect(1)">
+    <h1 class="nonSelectable white conChild HeaderElementText">About</h1>
+    <img
+        src="{{ static('assets/icons/info.png') }}"
+        class="conChild" height="25px" id="Exit-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
+</div>
+{% endblock %}
+
+<!-- Footer -->
+{% block footerTxt %}
+Copyright © DIGIT, Inc. 2025. All rights reserved.
+{% endblock %}
+
+<!-- pop up at the end -->
+{% block beforeBodyEnd %}
+<div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="a" data-dismissible="false" style="max-width:400px;">
+    <div role="main" class="ui-content">
+        <h3 class="ui-title">Upload a file</h3>
+        <p>Choose a file to Upload.</p>
+        <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">Close</a>
+    </div>
+</div>
+<script>
+    $( function() {
+      $( document ).tooltip();
+    } );
+</script>
+<style>
+    label {
+      display: inline-block;
+      width: 5em;
+    }
+</style>
+{% endblock %}
+
+
+{% block burger1 %} $('#popupDialog').popup('open'); {% endblock %}
+{% block burger1Text %} Upload A File {% endblock %}
+
+{% block burger2 %} redirect(1) {% endblock %}
+{% block burger2Text %} About {% endblock %}
+
+{% block canvas %}
+<script src="{{ static('assets/scripts/canvas.js') }}"></script>
+{% endblock %}
+

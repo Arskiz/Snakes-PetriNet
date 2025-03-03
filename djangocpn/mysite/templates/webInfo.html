@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+<!-- Title on page -->
+{% block pageTitle %} About Snakes CPN Viewer {% endblock %}
+
+{% block head %}
+<!-- Add stylesheet for about page -->
+<link rel="stylesheet" href="{{ static('assets/style-about.css') }}"> 
+{% endblock %}
+
+<!-- Main Content -->
+{% block content %}
+<div class="about-container">
+    <!-- Project Info Card -->
+    <div class="about-card">
+        <div class="about-header">
+            <img src="{{ static('assets/icons/info.png') }}" class="about-icon" alt="About">
+            <h2>About This Project</h2>
+        </div>
+        <div class="about-content">
+            <p>The Snakes CPN Viewer is a specialized tool for visualizing and analyzing Colored Petri Nets. It provides researchers and students with an intuitive interface to explore complex Petri net structures and their behaviors.</p>
+            
+            <p>This viewer was developed for DIGIT at TU Clausthal to enhance research capabilities in formal modeling and verification methods.</p>
+            
+            <h3>Key Features</h3>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-icon">🔍</span>
+                    <span class="feature-text">Interactive visualization of CPN structures</span>
+                </li>
+                <li>
+                    <span class="feature-icon">📊</span>
+                    <span class="feature-text">Analysis of state spaces and behaviors</span>
+                </li>
+                <li>
+                    <span class="feature-icon">📋</span>
+                    <span class="feature-text">State reachability checking</span>
+                </li>
+                <li>
+                    <span class="feature-icon">📈</span>
+                    <span class="feature-text">Performance analysis and bottleneck identification</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Team Card -->
+    <div class="about-card">
+        <div class="about-header">
+            <img src="{{ static('assets/icons/team.png') }}" class="about-icon" alt="Team">
+            <h2>Development Team</h2>
+        </div>
+        <div class="about-content">
+            <div class="team-member">
+                <div class="avatar-placeholder"></div>
+                <div class="member-info">
+                    <h3>REDACTED</h3>
+                    <p>Lead Developer</p>
+                    <p class="member-desc">Responsible for core functionality and interface design.</p>
+                </div>
+            </div>
+            
+            <div class="team-member">
+                <div class="avatar-placeholder"></div>
+                <div class="member-info">
+                    <h3>Professor [Name]</h3>
+                    <p>Project Supervisor</p>
+                    <p class="member-desc">Provided academic guidance and requirements specification.</p>
+                </div>
+            </div>
+            
+            <p class="team-note">This project was completed as part of the Digital Technologies initiative at TU Clausthal, 2025.</p>
+        </div>
+    </div>
+    
+    <!-- Technical Info Card -->
+    <div class="about-card">
+        <div class="about-header">
+            <img src="{{ static('assets/icons/technical.png') }}" class="about-icon" alt="Technology">
+            <h2>Technical Information</h2>
+        </div>
+        <div class="about-content">
+            <h3>Technologies Used</h3>
+            <div class="tech-list">
+                <div class="tech-item">
+                    <div class="tech-icon">JS</div>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">HTML</div>
+                    <span>HTML5</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">CSS</div>
+                    <span>CSS3</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">PY</div>
+                    <span>Python</span>
+                </div>
+            </div>
+            
+            <h3>Compatibility</h3>
+            <p>This tool is optimized for modern browsers including Chrome, Firefox, Safari, and Edge.</p>
+            
+            <h3>Source Code</h3>
+            <p>The source code for this project is available upon request from the DIGIT administration at TU Clausthal.</p>
+        </div>
+    </div>
+    
+    <!-- Contact Card -->
+    <div class="about-card">
+        <div class="about-header">
+            <img src="{{ static('assets/icons/mail.png') }}" class="about-icon" alt="Contact">
+            <h2>Contact Information</h2>
+        </div>
+        <div class="about-content">
+            <p>For questions, feedback, or support regarding the Snakes CPN Viewer, please contact:</p>
+            <div class="contact-info">
+                <p><strong>Email:</strong> contact@example.com</p>
+                <p><strong>Department:</strong> Digital Technologies, TU Clausthal</p>
+                <p><strong>Website:</strong> <a href="https://www.tu-clausthal.de" target="_blank">www.tu-clausthal.de</a></p>
+            </div>
+        </div>
+    </div>
+    
+
+</div>
+{% endblock %}
+
+<!-- Right side of the header -->
+{% block rightHeaderContent %}
+<div class="Hoverable" id="HomeBtn" onclick="redirect(2)">
+    <h1 class="nonSelectable white conChild HeaderElementText">To Snakes CPN</h1>
+    <img
+        src="{{ static('assets/icons/home.png') }}"
+        class="conChild" height="20px" id="Exit-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
+</div>
+{% endblock %}
+
+<!-- Footer -->
+{% block footerTxt %}
+Copyright © DIGIT, Inc. 2025. All rights reserved.
+{% endblock %}
+
+{% block burger2 %} window.location.href='https://www.google.com/' {% endblock %}
+{% block burger2Text %} Exit Site {% endblock %}
+
+{% block burger1 %} redirect(2) {% endblock %}
+{% block burger1Text %} Back to SnakesCPN {% endblock %}
+
+{% block canvas %}
+<script src="{{ static('assets/scripts/canvas.js') }}"></script>
+{% endblock %}
