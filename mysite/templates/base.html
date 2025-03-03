@@ -57,7 +57,7 @@
                     
                     {% endblock %}
                 </div>
-                <div id="HeaderRightHamburger" class="Hoverable">
+                <div id="HeaderRightHamburger" class="Hoverable" onclick="openNav()">
                     <img id="HamburgerBTNImg"
                         src="{{ static('assets/icons/hamburger.svg') }}"
                         alt="hamburger-icon"
@@ -65,6 +65,20 @@
                 </div>
             </div>
         </header>
+        <div id="mySidenav" class="sidenav">
+            <div id="headerNav">
+                <p class="footerNavTitle text-white twentypx">Navigation</p>
+                <img class="closebtn Hoverable" src="{{ static('assets/icons/close.png') }}" alt="close-icon" onclick="closeNav()">
+            </div>
+            <div class="sidenav-content">
+                <a href="#" onclick="redirect(2)" class="link">Upload another file</a>
+                <a href="#" onclick="redirect(999)" class="link">Home</a>
+                <a href="#" onclick="redirect(1)" class="link">About</a>
+            </div>
+            <div id="footerNav">
+                <p class="text-center text-white">© 2025 Snakes CPN Viewer</p>
+            </div>
+        </div>
         {% block archDiv %}
         <div id="archDiv">
         {% endblock %}

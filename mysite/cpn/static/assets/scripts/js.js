@@ -19,7 +19,7 @@ $(window).on("load", function () {
             SetCanvas(true);
             break;
     }
-
+    /* THE FOLLOWING CODE IS DEPRECATED AND REPLACED WITH A MORE BEAUTIFIED DESIGN
     hamburgerMenuButton.on("click", function () {
         if (!isHamburgerMenuOpened) {
             hamburgerMenuContent.css("animation", "smoothOpacityIn 1s ease-in-out, growInFromVoid 1s ease-in-out");
@@ -37,6 +37,7 @@ $(window).on("load", function () {
 
         isHamburgerMenuOpened = !isHamburgerMenuOpened;
     })
+    END OF REMOVED CODE */
 
     // In future -> add settings stuff for background canvas - START
     $('#canvasAnimation').click(function () {
@@ -61,6 +62,16 @@ $(window).on("load", function () {
 
     // In future -> add settings stuff for background canvas - END
 });
+
+ /* Set the width of the side navigation to {x}px */
+ function openNav() {
+    document.getElementById("mySidenav").style.width = "320px";
+}
+
+/* Set the width of the side navigation to 0 */
+function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+}
 
 // Animates a specified element with custom callbacks
 function animateElement(element, animationName, durationInSeconds, callback) {

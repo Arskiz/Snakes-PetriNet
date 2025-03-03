@@ -8,10 +8,23 @@
     --blurBG: rgba(255, 255, 255, 0.15);
 }
 
+p, span, h1, h2, h3, h4, h5, h6, a {
+    font-family: var(--mercFont);
+    text-shadow: none !important;
+}
+
+.link{
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.link:hover{
+    font-size: 30px;
+}
+
 /* File Upload Popup */
 .file-upload-popup {
-    width: 140% !important;
-    max-width: 500px !important;
+    
     background-color: rgb(211, 211, 211) !important;
     border-radius: 12px !important;
     overflow: hidden !important;
@@ -65,6 +78,11 @@
 
 .file-input-container input[type="file"] {
     display: none;
+}
+
+label{
+    font-family: var(--mercFont);
+    width: 12em !important;
 }
 
 .file-input-label {
@@ -166,6 +184,15 @@
     background: none !important;
     visibility: visible !important;
     display: block !important;
+}
+
+.ui-popup-container {
+    transition: all 0.4s ease !important; 
+    position: fixed !important; 
+    width: 400px !important;
+    top: 50% !important;
+    left: 50% !important; 
+    transform: translate(-50%, -50%) !important; 
 }
 
 hr{
@@ -544,7 +571,7 @@ footer {
     align-items: center;
     backdrop-filter: blur(7px);
     
-    z-index: 5;
+    z-index: 2;
     width: 100%;
 }
 
@@ -766,6 +793,12 @@ body {
 .Hoverable{
     align-items: center;
     justify-content: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 
@@ -980,7 +1013,6 @@ footer {
     background: linear-gradient(90deg, rgba(81, 101, 64, 0.95) 0%, rgba(0, 95, 122, 0.95) 100%);
     backdrop-filter: blur(8px);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 100;
 }
 
 #innerFooter {
@@ -1139,6 +1171,113 @@ body {
 #footerText {
     transition: all 0.2s;
 }
+
+/* The side navigation menu */
+.sidenav {
+    backdrop-filter: blur(3px);
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 3; /* Stay on top */
+    top: 0; /* Stay at the top */
+    right: 0;
+    background: transparent;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 100px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+  }
+  
+  /* The navigation menu links */
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: white !important;
+    display: block;
+    transition: 0.3s;
+    border-radius: 5px;
+    border: none;
+    backdrop-filter: blur(1px);
+    margin-top: 5px;
+  }
+  
+  /* When you mouse over the navigation links, change their color */
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+  
+  /* Position and style the close button (top right corner) */
+  .sidenav {
+    position: fixed;
+    top: 0 !important;
+    right: 0px !important;
+    bottom: 0 !important;
+    left: auto !important;
+    font-size: 36px;
+    overflow: hidden !important;
+  }
+
+  .closebtn
+  {
+    transition: all 0.2s;
+    border: none !important;
+    border-radius: 5px !important;
+    position: absolute !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    top: 13px !important;
+    width: 45px !important;
+    height: 45px !important;
+    filter:invert(100%)
+  }
+
+  .closebtn:hover{
+    filter: invert(70%);
+  }
+
+.footerNavTitle {
+    font-size: 25px;
+    font-family: var(--mercFont);
+    color: white;
+    position: absolute;
+    top: 25%;
+    left: 10%;
+}
+
+.sidenav-content {
+    position: absolute;
+    top: 70px; /* I suggest you use global variables for this */
+    left: 0%;
+    right: 0%;
+    bottom: 70px; /* I suggest you use global variables for this */
+    background: linear-gradient(90deg, rgba(81, 101, 64, 0.7) 0%, rgba(0, 95, 122, 0.8) 100%);
+}
+
+#footerNav {
+    position: absolute;
+    bottom: 0;
+}
+
+#headerNav {
+    position: absolute;
+    top: 0;
+    
+}
+
+#headerNav, #footerNav {
+    align-items: center;
+    justify-content: center;
+    left: 0;
+    right: 0;
+    height: 70px; /* I suggest you use global variables for this */
+    background: linear-gradient(-90deg,rgba(81, 101, 64, 0.95) 0%, rgba(0, 95, 122, 0.95) 100%);
+}  
+
+  /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+  @media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+  }
 
 @media (max-width: 900px) {
     #HomeText {
