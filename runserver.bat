@@ -1,6 +1,5 @@
 @echo off
 
-cd mysite
 echo Starting Django development server...
 echo --------------------------------------------------------
 echo Checking for Python...

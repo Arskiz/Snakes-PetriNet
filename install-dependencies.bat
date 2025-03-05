@@ -12,7 +12,6 @@ if errorlevel 1 (
 )
 
 echo Checking if requirements.txt exists...
-cd mysite
 if not exist requirements.txt (
     echo Error: requirements.txt not found! Make sure you're in the correct directory.
     pause
