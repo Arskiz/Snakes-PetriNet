@@ -26,7 +26,6 @@ PyQt5_sip==12.17.0
 python-dateutil==2.9.0.post0
 six==1.17.0
 SNAKES==0.9.33
-snakes_spn==1.0.0
 sqlparse==0.5.3
 tzdata==2025.1
 Werkzeug==3.1.3
