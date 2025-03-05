@@ -1,6 +1,6 @@
 # Snakes-PetriNet
 
-SNAKESCPN is a web-based visualization tool for Colored Petri Nets (CPN) built using Django and the SNAKES library.
+This tool is a web-based visualization tool for Colored Petri Nets (CPN) built using Django and the SNAKES library.
 
 ## Description
 This project provides an interactive web interface for creating, editing and visualizing Colored Petri Nets. It leverages the powerful SNAKES library for the underlying Petri net functionality and Django for the web framework.
