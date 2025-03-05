@@ -12,6 +12,16 @@ let isHamburgerMenuOpened = false;
 // Initializes dropdown handlers on window load
 $(window).on("load", function () {
 
+    // Clear nav items if their text is empty
+    const navContent = $("#mySidenav .sidenav-content");
+    const navItems = navContent.find("a");
+    navItems.each(function () {
+        const navText = $(this).text().trim();
+        if (navText === "") {
+            $(this).hide();
+        }
+    });
+
     let cV = localStorage.getItem("canvasAnimation");
     switch (cV) {
         case null:
@@ -63,8 +73,8 @@ $(window).on("load", function () {
     // In future -> add settings stuff for background canvas - END
 });
 
- /* Set the width of the side navigation to {x}px */
- function openNav() {
+/* Set the width of the side navigation to {x}px */
+function openNav() {
     document.getElementById("mySidenav").style.width = "320px";
 }
 
@@ -207,5 +217,4 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.left = leftVal + 'px';
     });
 });
-    
 // Template created in 2024, Copyright © Aron Särkioja. All rights reserved.

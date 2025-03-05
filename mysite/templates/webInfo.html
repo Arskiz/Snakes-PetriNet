@@ -32,11 +32,11 @@
                     <span class="feature-icon">📊</span>
                     <span class="feature-text">Analysis of state spaces and behaviors</span>
                 </li>
-                <li>
+                <li hidden>
                     <span class="feature-icon">📋</span>
                     <span class="feature-text">State reachability checking</span>
                 </li>
-                <li>
+                <li hidden>
                     <span class="feature-icon">📈</span>
                     <span class="feature-text">Performance analysis and bottleneck identification</span>
                 </li>
@@ -82,19 +82,19 @@
         <div class="about-content">
             <h3>Technologies Used</h3>
             <div class="tech-list">
-                <div class="tech-item">
+                <div class="tech-item Hoverable" onclick="window.location.href='https://www.w3schools.com/javascript/'">
                     <div class="tech-icon">JS</div>
                     <span>JavaScript</span>
                 </div>
-                <div class="tech-item">
+                <div class="tech-item Hoverable" onclick="window.location.href='https://www.w3schools.com/html/'">
                     <div class="tech-icon">HTML</div>
                     <span>HTML5</span>
                 </div>
-                <div class="tech-item">
+                <div class="tech-item Hoverable" onclick="window.location.href='https://www.w3schools.com/css/'">
                     <div class="tech-icon">CSS</div>
                     <span>CSS3</span>
                 </div>
-                <div class="tech-item">
+                <div class="tech-item Hoverable" onclick="window.location.href='https://www.python.org/'">
                     <div class="tech-icon">PY</div>
                     <span>Python</span>
                 </div>
@@ -104,7 +104,7 @@
             <p>This tool is optimized for modern browsers including Chrome, Firefox, Safari, and Edge.</p>
             
             <h3>Source Code</h3>
-            <p>The source code for this project is available upon request from the DIGIT administration at TU Clausthal.</p>
+            <p>This project is closed source.</p>
         </div>
     </div>
     
@@ -150,6 +150,9 @@ Copyright © DIGIT, Inc. 2025. All rights reserved.
 
 {% block burger1 %} redirect(2) {% endblock %}
 {% block burger1Text %} Back to SnakesCPN {% endblock %}
+
+{% block nav2 %} onclick="redirect(2)" {% endblock %}
+{% block nav2Text %} Home {% endblock %}
 
 {% block canvas %}
 <script type="module" src="{{ static('assets/scripts/canvas.js') }}"></script>

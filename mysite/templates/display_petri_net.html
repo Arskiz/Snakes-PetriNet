@@ -11,8 +11,8 @@ Petri Net Analysis: {{ filename }}
 {% block content %}
 <div class="petri-container">
     <div class="petri-header">
-        <h1>Petri Net Analysis</h1>
-        <p class="petri-filename">{{ filename }}</p>
+        <h1>Petri Net Analysis:</h1>
+        <p id="petri-filename" class="petri-filename" title="File Name: {{ filename }}">{{ filename }}</p>
     </div>
     
     <!-- Visualization Section -->
@@ -151,1046 +151,25 @@ Petri Net Analysis: {{ filename }}
         evt.currentTarget.classList.add("active");
     }
 </script>
+
+
+<!-- DRAWING PETRINET WITH D3JS -->
 <script type="module">
     import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
     // Add simulation controls to the page
-function addSimulationControls() {
-    // Create the simulation controls container
-    const container = d3.select('.canvas-container');
-    const controlsDiv = container.append('div')
-        .attr('class', 'simulation-controls')
-        .style('position', 'absolute')
-        .style('bottom', '10px')
-        .style('left', '10px')
-        .style('background-color', 'rgba(255, 255, 255, 0.8)')
-        .style('padding', '10px')
-        .style('border-radius', '5px')
-        .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.1)');
-    
-    // Add simulation buttons
-    controlsDiv.append('button')
-        .attr('id', 'start-sim')
-        .attr('class', 'sim-button')
-        .text('Start')
-        .on('click', startSimulation);
-    
-    controlsDiv.append('button')
-        .attr('id', 'stop-sim')
-        .attr('class', 'sim-button')
-        .text('Stop')
-        .style('margin-left', '5px')
-        .on('click', stopSimulation);
-    
-    controlsDiv.append('button')
-        .attr('id', 'step-sim')
-        .attr('class', 'sim-button')
-        .text('Step')
-        .style('margin-left', '5px')
-        .on('click', stepSimulation);
-    
-    controlsDiv.append('button')
-        .attr('id', 'reset-sim')
-        .attr('class', 'sim-button')
-        .text('Reset')
-        .style('margin-left', '5px')
-        .on('click', resetSimulation);
-    
-    // Add speed control slider
-    controlsDiv.append('span')
-        .text('Speed: ')
-        .style('margin-left', '10px');
-    
-    controlsDiv.append('input')
-        .attr('id', 'sim-speed')
-        .attr('type', 'range')
-        .attr('min', '100')
-        .attr('max', '2000')
-        .attr('value', '500')
-        .attr('step', '100')
-        .style('vertical-align', 'middle');
-    
-    // Add CSS for buttons
-    const style = document.createElement('style');
-    style.textContent = `
-        .sim-button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            background-color: #005F7A;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        
-        .sim-button:hover {
-            background-color: #0A3541;
-        }
-        
-        .sim-button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        .token-transition {
-            fill: #FF5722;
-            opacity: 0.8;
-        }
-        
-        .transition-active {
-            stroke: #FF5722;
-            stroke-width: 3px;
-            filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-// Initialize simulation variables
-let simulationInterval = null;
-let initialPetriNetState = null;
-let currentPetriNetState = null;
-let nodesMap = new Map(); // Store references to nodes by id
-
-// Store initial state of the Petri net and create a nodes map
-function saveInitialState(petriNetData) {
-    // Clone the data to avoid modifying the original
-    initialPetriNetState = JSON.parse(JSON.stringify(petriNetData));
-    currentPetriNetState = JSON.parse(JSON.stringify(petriNetData));
-    
-    // Create a map of node data for easy lookup
-    updateNodesMap();
-}
-
-// Update the nodes map with current D3 node positions
-function updateNodesMap() {
-    nodesMap.clear();
-    
-    // Get all place nodes
-    d3.selectAll('.node.place').each(function(d) {
-        if (d && d.id) {
-            nodesMap.set(d.id, {
-                element: this,
-                data: d,
-                type: 'place'
-            });
-        }
-    });
-    
-    // Get all transition nodes
-    d3.selectAll('.node.transition').each(function(d) {
-        if (d && d.id) {
-            nodesMap.set(d.id, {
-                element: this,
-                data: d,
-                type: 'transition'
-            });
-        }
-    });
-}
-
-// Start automatic simulation
-function startSimulation() {
-    // Disable start and step buttons
-    d3.select('#start-sim').property('disabled', true);
-    d3.select('#step-sim').property('disabled', true);
-    
-    // Get simulation speed from slider
-    const speed = parseInt(d3.select('#sim-speed').property('value'));
-    
-    // Clear any existing interval
-    if (simulationInterval) {
-        clearInterval(simulationInterval);
-    }
-    
-    // Update nodes map to ensure we have the latest positions
-    updateNodesMap();
-    
-    // Set interval for automatic simulation steps
-    simulationInterval = setInterval(() => {
-        const fired = performSimulationStep();
-        
-        // If no transitions can fire, stop simulation
-        if (!fired) {
-            stopSimulation();
-            alert('Simulation stopped: No enabled transitions');
-        }
-    }, speed);
-}
-
-// Stop automatic simulation
-function stopSimulation() {
-    // Clear the interval
-    if (simulationInterval) {
-        clearInterval(simulationInterval);
-        simulationInterval = null;
-    }
-    
-    // Re-enable start and step buttons
-    d3.select('#start-sim').property('disabled', false);
-    d3.select('#step-sim').property('disabled', false);
-}
-
-// Perform a single simulation step
-function stepSimulation() {
-    // Update nodes map to ensure we have the latest positions
-    updateNodesMap();
-    performSimulationStep();
-}
-
-// Reset the simulation to initial state
-function resetSimulation() {
-    // Stop any running simulation
-    stopSimulation();
-    
-    // Reset to initial state
-    currentPetriNetState = JSON.parse(JSON.stringify(initialPetriNetState));
-    
-    // Update visualization
-    updatePlacesWithTokens();
-}
-
-// Core function to perform one step of the Petri net simulation
-function performSimulationStep() {
-    // Find all enabled transitions
-    const enabledTransitions = findEnabledTransitions();
-    
-    // If no transitions are enabled, return false
-    if (enabledTransitions.length === 0) {
-        return false;
-    }
-    
-    // Randomly select one of the enabled transitions
-    const randomIndex = Math.floor(Math.random() * enabledTransitions.length);
-    const selectedTransition = enabledTransitions[randomIndex];
-    
-    // Fire the selected transition
-    fireTransition(selectedTransition);
-    
-    return true;
-}
-
-// Find all enabled transitions in the current state
-function findEnabledTransitions() {
-    const enabledTransitions = [];
-    
-    currentPetriNetState.transitions.forEach(transition => {
-        // Check if all input places have enough tokens
-        const isEnabled = transition.from.every(placeId => {
-            const place = currentPetriNetState.places.find(p => p.id === placeId);
-            return place && place.tokens > 0;
-        });
-        
-        if (isEnabled) {
-            enabledTransitions.push(transition);
-        }
-    });
-    
-    return enabledTransitions;
-}
-
-// Fire a transition, removing tokens from input places and adding to output places
-function fireTransition(transition) {
-    // Highlight the transition
-    highlightTransition(transition.id);
-    
-    // 1. Prepare animation data
-    const inputAnimations = prepareInputAnimations(transition);
-    const outputAnimations = prepareOutputAnimations(transition);
-    
-    // 2. Update the state - remove tokens from input places
-    transition.from.forEach(placeId => {
-        const place = currentPetriNetState.places.find(p => p.id === placeId);
-        if (place) {
-            place.tokens--;
-        }
-    });
-    
-    // 3. Add tokens to output places
-    transition.to.forEach(placeId => {
-        const place = currentPetriNetState.places.find(p => p.id === placeId);
-        if (place) {
-            place.tokens++;
-        }
-    });
-    
-    // 4. Animate the token movement
-    animateTokenFlow(inputAnimations, outputAnimations, transition.id);
-    
-    // 5. Update visualization after a delay to match animation
-    setTimeout(() => {
-        updatePlacesWithTokens();
-        unhighlightTransition(transition.id);
-    }, 1000); // Match this with the total animation duration
-}
-
-// Prepare animations for tokens from input places to transition
-function prepareInputAnimations(transition) {
-    const animations = [];
-    
-    // Get transition position
-    const transNode = nodesMap.get(transition.id);
-    if (!transNode) return animations;
-    
-    const transPos = getNodePosition(transNode.element);
-    
-    // For each input place, prepare animation
-    transition.from.forEach(placeId => {
-        const placeNode = nodesMap.get(placeId);
-        if (!placeNode) return;
-        
-        const placePos = getNodePosition(placeNode.element);
-        
-        animations.push({
-            from: placePos,
-            to: transPos,
-            placeId: placeId
-        });
-    });
-    
-    return animations;
-}
-
-// Prepare animations for tokens from transition to output places
-function prepareOutputAnimations(transition) {
-    const animations = [];
-    
-    // Get transition position
-    const transNode = nodesMap.get(transition.id);
-    if (!transNode) return animations;
-    
-    const transPos = getNodePosition(transNode.element);
-    
-    // For each output place, prepare animation
-    transition.to.forEach(placeId => {
-        const placeNode = nodesMap.get(placeId);
-        if (!placeNode) return;
-        
-        const placePos = getNodePosition(placeNode.element);
-        
-        animations.push({
-            from: transPos,
-            to: placePos,
-            placeId: placeId
-        });
-    });
-    
-    return animations;
-}
-
-// Helper function to get a node's position
-function getNodePosition(element) {
-    const transform = d3.select(element).attr('transform');
-    const match = transform.match(/translate\(([^,]+),([^)]+)\)/);
-    
-    if (match && match.length >= 3) {
-        return {
-            x: parseFloat(match[1]),
-            y: parseFloat(match[2])
-        };
-    }
-    
-    return { x: 0, y: 0 };
-}
-
-// Animate tokens flowing through the Petri net
-function animateTokenFlow(inputAnimations, outputAnimations, transitionId) {
-    const svg = d3.select('#petri-net-svg');
-    const g = svg.select('g'); // Main group
-    
-    // 1. First animate tokens from input places to transition
-    const inputTokens = g.selectAll(`.token-input-animation`)
-        .data(inputAnimations)
-        .enter()
-        .append('circle')
-        .attr('class', 'token-input-animation token-transition')
-        .attr('r', 5)
-        .attr('cx', d => d.from.x)
-        .attr('cy', d => d.from.y);
-    
-    // Animate input tokens
-    inputTokens.transition()
-        .duration(400)
-        .attr('cx', d => d.to.x)
-        .attr('cy', d => d.to.y)
-        .on('end', function() {
-            // Remove input tokens when they reach the transition
-            inputTokens.remove();
-            
-            // Add a flash effect to the transition
-            const transNode = nodesMap.get(transitionId);
-            if (transNode) {
-                d3.select(transNode.element).select('rect')
-                    .classed('pulse-animation', true)
-                    .transition()
-                    .duration(100)
-                    .on('end', function() {
-                        d3.select(this).classed('pulse-animation', false);
-                    });
-            }
-            
-            // Then animate tokens from transition to output places
-            const outputTokens = g.selectAll(`.token-output-animation`)
-                .data(outputAnimations)
-                .enter()
-                .append('circle')
-                .attr('class', 'token-output-animation token-transition')
-                .attr('r', 5)
-                .attr('cx', d => d.from.x)
-                .attr('cy', d => d.from.y);
-            
-            // Animate output tokens
-            outputTokens.transition()
-                .duration(400)
-                .attr('cx', d => d.to.x)
-                .attr('cy', d => d.to.y)
-                .on('end', function() {
-                    // Remove output tokens when they reach the place
-                    outputTokens.remove();
-                });
-        });
-}
-
-// Highlight a transition when it fires
-function highlightTransition(transitionId) {
-    const transNode = nodesMap.get(transitionId);
-    if (transNode) {
-        d3.select(transNode.element).select('rect')
-            .classed('transition-active', true);
-    }
-}
-
-// Remove highlight from a transition
-function unhighlightTransition(transitionId) {
-    const transNode = nodesMap.get(transitionId);
-    if (transNode) {
-        d3.select(transNode.element).select('rect')
-            .classed('transition-active', false);
-    }
-}
-
-// Update the visualization to show current token counts
-function updatePlacesWithTokens() {
-    // Update each place based on currentPetriNetState
-    currentPetriNetState.places.forEach(placeState => {
-        const placeNode = nodesMap.get(placeState.id);
-        if (!placeNode) return;
-        
-        const placeElement = d3.select(placeNode.element);
-        
-        // First, make sure the main place circle exists
-        if (placeElement.select('circle').empty()) {
-            // If the main circle is missing, recreate it
-            placeElement.append('circle')
-                .attr('r', 25)
-                .attr('fill', 'rgba(200, 200, 255, 0.7)')
-                .attr('stroke', 'rgba(0, 95, 122, 0.8)')
-                .attr('stroke-width', 2);
-        }
-        
-        // Remove token indicators (second circle or text) but keep the main circle and title text
-        placeElement.selectAll('circle:not(:first-child)').remove();
-        placeElement.selectAll('text:not([dy="-30"])').remove();
-        
-        // Add tokens if any
-        if (placeState.tokens > 0) {
-            if (placeState.tokens === 1) {
-                placeElement.append('circle')
-                    .attr('r', 5)
-                    .attr('fill', 'rgba(0, 95, 122, 0.8)');
-            } else {
-                placeElement.append('text')
-                    .attr('text-anchor', 'middle')
-                    .attr('dy', 5)
-                    .attr('font-size', 14)
-                    .attr('font-weight', 'bold')
-                    .attr('fill', '#0a3541')
-                    .text(placeState.tokens);
-            }
-        }
-        
-        // Check if we need to re-add the label
-        if (placeElement.selectAll('text[dy="-30"]').empty()) {
-            placeElement.append('text')
-                .attr('dy', -30)
-                .attr('text-anchor', 'middle')
-                .attr('fill', '#0a3541')
-                .text(placeState.id);
-        }
-    });
-}
-
-// Initialize simulation
-function initializeSimulation(petriNetData) {
-    // Wait for D3 visualization to fully render
-    setTimeout(() => {
-        // Add simulation controls to the page
-        addSimulationControls();
-        
-        // Save initial state
-        saveInitialState(petriNetData);
-    }, 500);
-}
-
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        const petriNetData = {{ petri_net_data|safe }};
-        
-        // Create nodes and links arrays for D3
-        const nodes = [];
-        const links = [];
-        
-        // Add places as nodes
-        petriNetData.places.forEach(place => {
-            nodes.push({
-                id: place.id,
-                name: place.name || place.id,
-                type: 'place',
-                tokens: place.tokens || 0
-            });
-        });
-        
-        // Add transitions as nodes
-        petriNetData.transitions.forEach(transition => {
-            nodes.push({
-                id: transition.id,
-                name: transition.name || transition.id,
-                type: 'transition'
-            });
-            
-            // Add arcs from places to this transition
-            transition.from.forEach(placeId => {
-                links.push({
-                    source: placeId,
-                    target: transition.id,
-                    type: 'input'
-                });
-            });
-            
-            // Add arcs from this transition to places
-            transition.to.forEach(placeId => {
-                links.push({
-                    source: transition.id,
-                    target: placeId,
-                    type: 'output',
-                    weight: transition.weights ? (transition.weights[placeId] || 1) : 1
-                });
-            });
-        });
-        
-        // Add weights if available in the arcs array
-        if (petriNetData.arcs && petriNetData.arcs.length) {
-            petriNetData.arcs.forEach(arc => {
-                // Find the corresponding link
-                const link = links.find(l => 
-                    l.source === arc.source && 
-                    l.target === arc.target
-                );
-                
-                if (link) {
-                    link.weight = arc.weight || 1;
-                }
-            });
-        }
-        
-        // Set up SVG container
-        const container = d3.select('.canvas-container');
-        const containerWidth = container.node().getBoundingClientRect().width;
-        const containerHeight = container.node().getBoundingClientRect().height;
-        
-        // Remove any existing SVG (for redraw)
-        container.select('svg').remove();
-        
-        // Create SVG element
-        const svg = container.append('svg')
-            .attr('width', containerWidth)
-            .attr('height', containerHeight)
-            .attr('id', 'petri-net-svg')
-            .call(d3.zoom().on('zoom', function(event) {
-                g.attr('transform', event.transform);
-            }));
-        
-        // Add a defs section for markers (arrow heads)
-        const defs = svg.append('defs');
-        
-        // Define arrow head for input arcs
-        defs.append('marker')
-            .attr('id', 'input-arrow')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 5)
-            .attr('refY', 0)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .attr('orient', 'auto')
-            .append('path')
-            .attr('d', 'M0,-5L10,0L0,5')
-            .attr('fill', 'rgba(0, 95, 122, 0.8)');
-        
-        // Define arrow head for output arcs
-        defs.append('marker')
-            .attr('id', 'output-arrow')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 5)
-            .attr('refY', 0)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .attr('orient', 'auto')
-            .append('path')
-            .attr('d', 'M0,-5L10,0L0,5')
-            .attr('fill', 'rgba(81, 101, 64, 0.8)');
-        
-        // Create a group to contain the entire visualization
-        const g = svg.append('g');
-        
-        // Create the force simulation
-        const simulation = d3.forceSimulation(nodes)
-            .force('link', d3.forceLink(links).id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-500))
-            .force('center', d3.forceCenter(containerWidth / 2, containerHeight / 2))
-            .force('collision', d3.forceCollide().radius(d => d.type === 'place' ? 35 : 25))
-            .force('x', d3.forceX(containerWidth / 2).strength(0.05))
-            .force('y', d3.forceY(containerHeight / 2).strength(0.05));
-        
-        // Create links (arcs)
-        const link = g.append('g')
-            .attr('class', 'links')
-            .selectAll('path')
-            .data(links)
-            .join('path')
-            .attr('class', 'link')
-            .attr('stroke', d => d.type === 'input' ? 'rgba(0, 95, 122, 0.8)' : 'rgba(81, 101, 64, 0.8)')
-            .attr('stroke-width', 2)
-            .attr('fill', 'none')
-            .attr('marker-end', d => d.type === 'input' ? 'url(#input-arrow)' : 'url(#output-arrow)');
-        
-        // Create weight labels
-        const weightLabel = g.append('g')
-            .attr('class', 'weight-labels')
-            .selectAll('g')
-            .data(links.filter(d => d.weight && d.weight !== 1))
-            .join('g');
-        
-        weightLabel.append('circle')
-            .attr('r', 10)
-            .attr('fill', 'rgba(255, 255, 255, 0.8)');
-        
-        weightLabel.append('text')
-            .attr('text-anchor', 'middle')
-            .attr('dy', 4)
-            .attr('font-size', 12)
-            .attr('font-weight', 'bold')
-            .attr('fill', '#0a3541')
-            .text(d => d.weight);
-        
-        // Create nodes
-        const node = g.append('g')
-            .attr('class', 'nodes')
-            .selectAll('g')
-            .data(nodes)
-            .join('g')
-            .attr('class', d => `node ${d.type}`)
-            .call(d3.drag()
-                .on('start', dragstarted)
-                .on('drag', dragged)
-                .on('end', dragended));
-        
-        // Add tooltips
-        node.append('title')
-            .text(d => `${d.id} (${d.name})`);
-        
-        // Add different shapes for places and transitions
-        node.each(function(d) {
-            const element = d3.select(this);
-            
-            if (d.type === 'place') {
-                // Create gradient for places
-                const gradientId = `place-gradient-${d.id.replace(/\s+/g, '-')}`;
-                const gradient = defs.append('radialGradient')
-                    .attr('id', gradientId)
-                    .attr('cx', '50%')
-                    .attr('cy', '50%')
-                    .attr('r', '50%')
-                    .attr('fx', '50%')
-                    .attr('fy', '50%');
-                    
-                gradient.append('stop')
-                    .attr('offset', '0%')
-                    .attr('stop-color', 'rgba(255, 255, 255, 0.9)');
-                    
-                gradient.append('stop')
-                    .attr('offset', '100%')
-                    .attr('stop-color', 'rgba(200, 200, 255, 0.7)');
-                
-                // Create place circle
-                element.append('circle')
-                    .attr('r', 25)
-                    .attr('fill', `url(#${gradientId})`)
-                    .attr('stroke', 'rgba(0, 95, 122, 0.8)')
-                    .attr('stroke-width', 2)
-                    .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
-                
-                // Add tokens if any
-                if (d.tokens > 0) {
-                    if (d.tokens === 1) {
-                        element.append('circle')
-                            .attr('r', 5)
-                            .attr('fill', 'rgba(0, 95, 122, 0.8)');
-                    } else {
-                        element.append('text')
-                            .attr('text-anchor', 'middle')
-                            .attr('dy', 5)
-                            .attr('font-size', 14)
-                            .attr('font-weight', 'bold')
-                            .attr('fill', '#0a3541')
-                            .text(d.tokens);
-                    }
-                }
-            } else {
-                // Create gradient for transitions
-                const gradientId = `transition-gradient-${d.id.replace(/\s+/g, '-')}`;
-                const gradient = defs.append('linearGradient')
-                    .attr('id', gradientId)
-                    .attr('x1', '0%')
-                    .attr('y1', '0%')
-                    .attr('x2', '100%')
-                    .attr('y2', '100%');
-                    
-                gradient.append('stop')
-                    .attr('offset', '0%')
-                    .attr('stop-color', 'rgba(81, 101, 64, 0.8)');
-                    
-                gradient.append('stop')
-                    .attr('offset', '100%')
-                    .attr('stop-color', 'rgba(81, 101, 64, 0.6)');
-                
-                // Create transition rectangle
-                element.append('rect')
-                    .attr('x', -15)
-                    .attr('y', -10)
-                    .attr('width', 30)
-                    .attr('height', 20)
-                    .attr('fill', `url(#${gradientId})`)
-                    .attr('stroke', 'rgba(81, 101, 64, 0.9)')
-                    .attr('stroke-width', 2)
-                    .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
-            }
-            
-            // Add label
-            element.append('text')
-                .attr('dy', d => d.type === 'place' ? -30 : -15)
-                .attr('text-anchor', 'middle')
-                .attr('fill', '#0a3541')
-                .text(d.id);
-        });
-        
-        // Helper function to calculate a point along a quadratic Bezier curve
-        function pointOnQuadraticBezier(p0, p1, p2, t) {
-            const x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
-            const y = (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y;
-            return { x, y };
-        }
-        
-        // Update link positions during simulation
-        simulation.on('tick', () => {
-            // Update links with curved paths
-            link.attr('d', d => {
-                // Get source and target coordinates
-                const sourceNode = nodes.find(n => n.id === d.source.id || n.id === d.source);
-                const targetNode = nodes.find(n => n.id === d.target.id || n.id === d.target);
-                
-                if (!sourceNode || !targetNode) return '';
-                
-                // Extract coordinates
-                const sourceX = sourceNode.x;
-                const sourceY = sourceNode.y;
-                const targetX = targetNode.x;
-                const targetY = targetNode.y;
-                
-                // Calculate midpoint
-                const midX = (sourceX + targetX) / 2;
-                const midY = (sourceY + targetY) / 2;
-                
-                // Calculate distance
-                const dx = targetX - sourceX;
-                const dy = targetY - sourceY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                // Adjust curvature based on distance
-                let curvature = 0;
-                if (distance > 150) {
-                    curvature = 0.2;
-                } else if (distance > 80) {
-                    curvature = 0.1;
-                }
-                
-                // Calculate control point offset perpendicular to the line
-                const offsetX = -dy * curvature;
-                const offsetY = dx * curvature;
-                
-                // Calculate control point
-                const controlX = midX + offsetX;
-                const controlY = midY + offsetY;
-                
-                // Start and end nodes have different radii
-                const sourceRadius = sourceNode.type === 'place' ? 25 : 15;
-                const targetRadius = targetNode.type === 'place' ? 25 : 15;
-                
-                // Calculate the angle to adjust start and end points
-                const angle = Math.atan2(targetY - sourceY, targetX - sourceX);
-                
-                // Adjust start and end points to begin/end at the node perimeter
-                const startX = sourceX + (sourceRadius * Math.cos(angle));
-                const startY = sourceY + (sourceRadius * Math.sin(angle));
-                
-                // For the target, we need to move inward from the edge a bit to accommodate the arrowhead
-                const endX = targetX - ((targetRadius + 5) * Math.cos(angle));
-                const endY = targetY - ((targetRadius + 5) * Math.sin(angle));
-                
-                // Store path parameters on the data for weight label positioning
-                d.pathParams = {
-                    start: { x: startX, y: startY },
-                    control: { x: controlX, y: controlY },
-                    end: { x: endX, y: endY }
-                };
-                
-                // Generate curved path
-                return `M${startX},${startY} Q${controlX},${controlY} ${endX},${endY}`;
-            });
-            
-            // Update weight labels - FIXED to be on the curve
-            weightLabel.attr('transform', d => {
-                // If we don't have path parameters yet, skip
-                if (!d.pathParams) return '';
-                
-                // Calculate point on the Bezier curve at t=0.5 (midpoint)
-                const bezierPoint = pointOnQuadraticBezier(
-                    d.pathParams.start, 
-                    d.pathParams.control, 
-                    d.pathParams.end, 
-                    0.5
-                );
-                
-                return `translate(${bezierPoint.x}, ${bezierPoint.y})`;
-            });
-            
-            // Update node positions
-            node.attr('transform', d => `translate(${d.x}, ${d.y})`);
-        });
-        
-        // Drag functions
-        function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
-        
-        function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
-        
-        function dragended(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            // Keep node fixed where user dragged it
-            // d.fx = null;
-            // d.fy = null;
-        }
-        
-        // Add legend
-        const legendWidth = 120;
-        const legendHeight = 140;
-        const legendX = containerWidth - legendWidth - 10;
-        const legendY = 10;
-        
-        const legend = svg.append('g')
-            .attr('class', 'legend')
-            .attr('transform', `translate(${legendX}, ${legendY})`);
-        
-        // Legend background
-        legend.append('rect')
-            .attr('width', legendWidth)
-            .attr('height', legendHeight)
-            .attr('rx', 8)
-            .attr('ry', 8)
-            .attr('fill', 'rgba(255, 255, 255, 0.9)')
-            .attr('stroke', 'rgba(0, 0, 0, 0.1)');
-        
-        // Legend title
-        legend.append('text')
-            .attr('x', 10)
-            .attr('y', 20)
-            .attr('font-size', 12)
-            .attr('font-weight', 'bold')
-            .attr('fill', '#0a3541')
-            .text('Legend');
-        
-        // Place legend item
-        const placeLegend = legend.append('g')
-            .attr('transform', 'translate(15, 40)');
-        
-        placeLegend.append('circle')
-            .attr('r', 10)
-            .attr('fill', 'rgba(200, 200, 255, 0.7)')
-            .attr('stroke', 'rgba(0, 95, 122, 0.8)')
-            .attr('stroke-width', 2);
-        
-        placeLegend.append('text')
-            .attr('x', 20)
-            .attr('y', 4)
-            .attr('font-size', 12)
-            .attr('fill', '#0a3541')
-            .text('Place');
-        
-        // Transition legend item
-        const transitionLegend = legend.append('g')
-            .attr('transform', 'translate(15, 70)');
-        
-        transitionLegend.append('rect')
-            .attr('x', -10)
-            .attr('y', -7)
-            .attr('width', 20)
-            .attr('height', 14)
-            .attr('fill', 'rgba(81, 101, 64, 0.8)')
-            .attr('stroke', 'rgba(81, 101, 64, 0.9)')
-            .attr('stroke-width', 2);
-        
-        transitionLegend.append('text')
-            .attr('x', 20)
-            .attr('y', 4)
-            .attr('font-size', 12)
-            .attr('fill', '#0a3541')
-            .text('Transition');
-        
-        // Input arc legend item
-        const inputArcLegend = legend.append('g')
-            .attr('transform', 'translate(15, 100)');
-        
-        inputArcLegend.append('line')
-            .attr('x1', -10)
-            .attr('y1', 0)
-            .attr('x2', 10)
-            .attr('y2', 0)
-            .attr('stroke', 'rgba(0, 95, 122, 0.8)')
-            .attr('stroke-width', 2)
-            .attr('marker-end', 'url(#input-arrow)');
-        
-        inputArcLegend.append('text')
-            .attr('x', 20)
-            .attr('y', 4)
-            .attr('font-size', 12)
-            .attr('fill', '#0a3541')
-            .text('Input Arc');
-        
-        // Output arc legend item
-        const outputArcLegend = legend.append('g')
-            .attr('transform', 'translate(15, 130)');
-        
-        outputArcLegend.append('line')
-            .attr('x1', -10)
-            .attr('y1', 0)
-            .attr('x2', 10)
-            .attr('y2', 0)
-            .attr('stroke', 'rgba(81, 101, 64, 0.8)')
-            .attr('stroke-width', 2)
-            .attr('marker-end', 'url(#output-arrow)');
-        
-        outputArcLegend.append('text')
-            .attr('x', 20)
-            .attr('y', 4)
-            .attr('font-size', 12)
-            .attr('fill', '#0a3541')
-            .text('Output Arc');
-        
-        // Handle window resize 
-        /* Not in use
-        window.addEventListener('resize', () => {
-            // Get new dimensions
-            const newWidth = container.node().getBoundingClientRect().width;
-            const newHeight = container.node().getBoundingClientRect().height;
-            
-            // Update SVG size
-            svg.attr('width', newWidth)
-            .attr('height', newHeight);
-            
-            // Update forces
-            simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
-                    .force('x', d3.forceX(newWidth / 2).strength(0.05))
-                    .force('y', d3.forceY(newHeight / 2).strength(0.05))
-                    .alpha(0.3)
-                    .restart();
-            
-            // Move legend
-            legend.attr('transform', `translate(${newWidth - legendWidth - 10}, 10)`);
-        }); 
-        */
-        
-        // Add CSS styles for D3 elements
-        const style = document.createElement('style');
-        style.textContent = `
-            .canvas-container {
-                position: relative;
-                width: 100%;
-                height: 100%;
-            }
-            
-            #petri-net-svg {
-                background-color: transparent;
-                cursor: move;
-            }
-            
-            .node {
-                cursor: pointer;
-            }
-            
-            .node:hover text {
-                font-weight: bold;
-            }
-            
-            .link {
-                pointer-events: none;
-            }
-        `;
-
-        
-        document.head.appendChild(style);
-
-        // Initialize simulation after the visualization is set up
-        setTimeout(() => {
-            const petriNetData = {{ petri_net_data|safe }};
-            initPetriNetSimulation(petriNetData);
-        }, 1000);
-
-// Add a flag to control the debug output
-const DEBUG_MODE = false;
-
-// This function runs after your existing D3 visualization is set up
-function initPetriNetSimulation(petriNetData) {
-    // Store the original data safely
-    const originalData = JSON.parse(JSON.stringify(petriNetData));
-    let currentData = JSON.parse(JSON.stringify(petriNetData));
-    let simulationInterval = null;
-    let isSimulationRunning = false;
-    
-    // Add control buttons
-    addSimulationControls();
-    
-    // CONTROL FUNCTIONS
     function addSimulationControls() {
+        // Create the simulation controls container
         const container = d3.select('.canvas-container');
-        
-        // Remove existing controls if any
-        container.select('.simulation-controls').remove();
-        
         const controlsDiv = container.append('div')
             .attr('class', 'simulation-controls')
             .style('position', 'absolute')
             .style('bottom', '10px')
             .style('left', '10px')
-            .style('background-color', 'rgba(255, 255, 255, 0.9)')
-            .style('padding', '12px')
-            .style('border-radius', '6px')
-            .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.2)');
+            .style('background-color', 'rgba(255, 255, 255, 0.8)')
+            .style('padding', '10px')
+            .style('border-radius', '5px')
+            .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.1)');
         
         // Add simulation buttons
         controlsDiv.append('button')
@@ -1233,13 +212,89 @@ function initPetriNetSimulation(petriNetData) {
             .attr('value', '500')
             .attr('step', '100')
             .style('vertical-align', 'middle');
+        
+        // Add CSS for buttons
+        const style = document.createElement('style');
+        style.textContent = `
+            .sim-button {
+                padding: 5px 10px;
+                border: none;
+                border-radius: 3px;
+                background-color: #005F7A;
+                color: white;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background-color 0.2s;
+            }
+            
+            .sim-button:hover {
+                background-color: #0A3541;
+            }
+            
+            .sim-button:disabled {
+                background-color: #cccccc;
+                cursor: not-allowed;
+            }
+            
+            .token-transition {
+                fill: #FF5722;
+                opacity: 0.8;
+            }
+            
+            .transition-active {
+                stroke: #FF5722;
+                stroke-width: 3px;
+                filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
+            }
+        `;
+        document.head.appendChild(style);
     }
-    
+
+    // Initialize simulation variables
+    let simulationInterval = null;
+    let initialPetriNetState = null;
+    let currentPetriNetState = null;
+    let nodesMap = new Map(); // Store references to nodes by id
+
+    // Store initial state of the Petri net and create a nodes map
+    function saveInitialState(petriNetData) {
+        // Clone the data to avoid modifying the original
+        initialPetriNetState = JSON.parse(JSON.stringify(petriNetData));
+        currentPetriNetState = JSON.parse(JSON.stringify(petriNetData));
+        
+        // Create a map of node data for easy lookup
+        updateNodesMap();
+    }
+
+    // Update the nodes map with current D3 node positions
+    function updateNodesMap() {
+        nodesMap.clear();
+        
+        // Get all place nodes
+        d3.selectAll('.node.place').each(function(d) {
+            if (d && d.id) {
+                nodesMap.set(d.id, {
+                    element: this,
+                    data: d,
+                    type: 'place'
+                });
+            }
+        });
+        
+        // Get all transition nodes
+        d3.selectAll('.node.transition').each(function(d) {
+            if (d && d.id) {
+                nodesMap.set(d.id, {
+                    element: this,
+                    data: d,
+                    type: 'transition'
+                });
+            }
+        });
+    }
+
+    // Start automatic simulation
     function startSimulation() {
-        if (isSimulationRunning) return;
-        
-        isSimulationRunning = true;
-        
         // Disable start and step buttons
         d3.select('#start-sim').property('disabled', true);
         d3.select('#step-sim').property('disabled', true);
@@ -1252,6 +307,9 @@ function initPetriNetSimulation(petriNetData) {
             clearInterval(simulationInterval);
         }
         
+        // Update nodes map to ensure we have the latest positions
+        updateNodesMap();
+        
         // Set interval for automatic simulation steps
         simulationInterval = setInterval(() => {
             const fired = performSimulationStep();
@@ -1263,7 +321,8 @@ function initPetriNetSimulation(petriNetData) {
             }
         }, speed);
     }
-    
+
+    // Stop automatic simulation
     function stopSimulation() {
         // Clear the interval
         if (simulationInterval) {
@@ -1271,45 +330,34 @@ function initPetriNetSimulation(petriNetData) {
             simulationInterval = null;
         }
         
-        isSimulationRunning = false;
-        
         // Re-enable start and step buttons
         d3.select('#start-sim').property('disabled', false);
         d3.select('#step-sim').property('disabled', false);
     }
-    
+
+    // Perform a single simulation step
     function stepSimulation() {
-        if (isSimulationRunning) return;
+        // Update nodes map to ensure we have the latest positions
+        updateNodesMap();
         performSimulationStep();
     }
-    
+
+    // Reset the simulation to initial state
     function resetSimulation() {
         // Stop any running simulation
         stopSimulation();
         
-        // Remove any animation tokens
-        d3.select('#petri-net-svg').selectAll('.token-animation').remove();
+        // Reset to initial state
+        currentPetriNetState = JSON.parse(JSON.stringify(initialPetriNetState));
         
-        // Reset to original data
-        currentData = JSON.parse(JSON.stringify(originalData));
-        
-        // Apply the new data to visualization
-        applyDataToVisualization(currentData);
+        // Update visualization
+        updatePlacesWithTokens();
     }
-    
-    // SIMULATION LOGIC
+
+    // Core function to perform one step of the Petri net simulation
     function performSimulationStep() {
-        if (isSimulationRunning && d3.selectAll('.token-animation').size() > 0) {
-            // Don't start a new step if animations are still running
-            return true;
-        }
-        
         // Find all enabled transitions
         const enabledTransitions = findEnabledTransitions();
-        
-        if (DEBUG_MODE) {
-            console.log("Enabled transitions:", enabledTransitions);
-        }
         
         // If no transitions are enabled, return false
         if (enabledTransitions.length === 0) {
@@ -1320,92 +368,1018 @@ function initPetriNetSimulation(petriNetData) {
         const randomIndex = Math.floor(Math.random() * enabledTransitions.length);
         const selectedTransition = enabledTransitions[randomIndex];
         
-        if (DEBUG_MODE) {
-            console.log("Selected transition:", selectedTransition);
-        }
-        
         // Fire the selected transition
         fireTransition(selectedTransition);
         
         return true;
     }
-    
+
+    // Find all enabled transitions in the current state
     function findEnabledTransitions() {
         const enabledTransitions = [];
         
-        currentData.transitions.forEach(transition => {
-            // Check if this is a source transition (no input places)
-            const isSourceTransition = transition.from.length === 0;
+        currentPetriNetState.transitions.forEach(transition => {
+            // Check if all input places have enough tokens
+            const isEnabled = transition.from.every(placeId => {
+                const place = currentPetriNetState.places.find(p => p.id === placeId);
+                return place && place.tokens > 0;
+            });
             
-            if (isSourceTransition) {
-                // Source transitions can always fire
+            if (isEnabled) {
                 enabledTransitions.push(transition);
-            } else {
-                // Normal transition - check if all input places have enough tokens
-                const isEnabled = transition.from.every(placeId => {
-                    const place = currentData.places.find(p => p.id === placeId);
-                    return place && place.tokens > 0;
-                });
-                
-                if (isEnabled) {
-                    enabledTransitions.push(transition);
-                }
             }
         });
         
         return enabledTransitions;
     }
-    
+
+    // Fire a transition, removing tokens from input places and adding to output places
     function fireTransition(transition) {
-        if (DEBUG_MODE) {
-            console.log("Firing transition:", transition.id);
-        }
-        
         // Highlight the transition
         highlightTransition(transition.id);
         
-        // Find the relevant arcs for animation
-        const inputArcs = getInputArcs(transition);
-        const outputArcs = getOutputArcs(transition);
+        // 1. Prepare animation data
+        const inputAnimations = prepareInputAnimations(transition);
+        const outputAnimations = prepareOutputAnimations(transition);
         
-        // If this is a source transition (no input places), just animate the outputs
-        if (transition.from.length === 0) {
-            // Flash the transition
-            flashTransition(transition.id).then(() => {
-                // Animate tokens from transition to output places
-                animateTokensAlongArcs(outputArcs, 'output').then(() => {
-                    // Update the data model after output animation
-                    transition.to.forEach(placeId => {
-                        const place = currentData.places.find(p => p.id === placeId);
-                        if (place) {
-                            place.tokens += 1;
-                        }
+        // 2. Update the state - remove tokens from input places
+        transition.from.forEach(placeId => {
+            const place = currentPetriNetState.places.find(p => p.id === placeId);
+            if (place) {
+                place.tokens--;
+            }
+        });
+        
+        // 3. Add tokens to output places
+        transition.to.forEach(placeId => {
+            const place = currentPetriNetState.places.find(p => p.id === placeId);
+            if (place) {
+                place.tokens++;
+            }
+        });
+        
+        // 4. Animate the token movement
+        animateTokenFlow(inputAnimations, outputAnimations, transition.id);
+        
+        // 5. Update visualization after a delay to match animation
+        setTimeout(() => {
+            updatePlacesWithTokens();
+            unhighlightTransition(transition.id);
+        }, 1000); // Match this with the total animation duration
+    }
+
+    // Prepare animations for tokens from input places to transition
+    function prepareInputAnimations(transition) {
+        const animations = [];
+        
+        // Get transition position
+        const transNode = nodesMap.get(transition.id);
+        if (!transNode) return animations;
+        
+        const transPos = getNodePosition(transNode.element);
+        
+        // For each input place, prepare animation
+        transition.from.forEach(placeId => {
+            const placeNode = nodesMap.get(placeId);
+            if (!placeNode) return;
+            
+            const placePos = getNodePosition(placeNode.element);
+            
+            animations.push({
+                from: placePos,
+                to: transPos,
+                placeId: placeId
+            });
+        });
+        
+        return animations;
+    }
+
+    // Prepare animations for tokens from transition to output places
+    function prepareOutputAnimations(transition) {
+        const animations = [];
+        
+        // Get transition position
+        const transNode = nodesMap.get(transition.id);
+        if (!transNode) return animations;
+        
+        const transPos = getNodePosition(transNode.element);
+        
+        // For each output place, prepare animation
+        transition.to.forEach(placeId => {
+            const placeNode = nodesMap.get(placeId);
+            if (!placeNode) return;
+            
+            const placePos = getNodePosition(placeNode.element);
+            
+            animations.push({
+                from: transPos,
+                to: placePos,
+                placeId: placeId
+            });
+        });
+        
+        return animations;
+    }
+
+    // Helper function to get a node's position
+    function getNodePosition(element) {
+        const transform = d3.select(element).attr('transform');
+        const match = transform.match(/translate\(([^,]+),([^)]+)\)/);
+        
+        if (match && match.length >= 3) {
+            return {
+                x: parseFloat(match[1]),
+                y: parseFloat(match[2])
+            };
+        }
+        
+        return { x: 0, y: 0 };
+    }
+
+    // Animate tokens flowing through the Petri net
+    function animateTokenFlow(inputAnimations, outputAnimations, transitionId) {
+        const svg = d3.select('#petri-net-svg');
+        const g = svg.select('g'); // Main group
+        
+        // 1. First animate tokens from input places to transition
+        const inputTokens = g.selectAll(`.token-input-animation`)
+            .data(inputAnimations)
+            .enter()
+            .append('circle')
+            .attr('class', 'token-input-animation token-transition')
+            .attr('r', 5)
+            .attr('cx', d => d.from.x)
+            .attr('cy', d => d.from.y);
+        
+        // Animate input tokens
+        inputTokens.transition()
+            .duration(400)
+            .attr('cx', d => d.to.x)
+            .attr('cy', d => d.to.y)
+            .on('end', function() {
+                // Remove input tokens when they reach the transition
+                inputTokens.remove();
+                
+                // Add a flash effect to the transition
+                const transNode = nodesMap.get(transitionId);
+                if (transNode) {
+                    d3.select(transNode.element).select('rect')
+                        .classed('pulse-animation', true)
+                        .transition()
+                        .duration(100)
+                        .on('end', function() {
+                            d3.select(this).classed('pulse-animation', false);
+                        });
+                }
+                
+                // Then animate tokens from transition to output places
+                const outputTokens = g.selectAll(`.token-output-animation`)
+                    .data(outputAnimations)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'token-output-animation token-transition')
+                    .attr('r', 5)
+                    .attr('cx', d => d.from.x)
+                    .attr('cy', d => d.from.y);
+                
+                // Animate output tokens
+                outputTokens.transition()
+                    .duration(400)
+                    .attr('cx', d => d.to.x)
+                    .attr('cy', d => d.to.y)
+                    .on('end', function() {
+                        // Remove output tokens when they reach the place
+                        outputTokens.remove();
                     });
-                    
-                    // Update the visualization with new token counts
-                    applyDataToVisualization(currentData);
-                    
-                    // Unhighlight the transition
-                    setTimeout(() => {
-                        unhighlightTransition(transition.id);
-                    }, 200);
+            });
+    }
+
+    // Highlight a transition when it fires
+    function highlightTransition(transitionId) {
+        const transNode = nodesMap.get(transitionId);
+        if (transNode) {
+            d3.select(transNode.element).select('rect')
+                .classed('transition-active', true);
+        }
+    }
+
+    // Remove highlight from a transition
+    function unhighlightTransition(transitionId) {
+        const transNode = nodesMap.get(transitionId);
+        if (transNode) {
+            d3.select(transNode.element).select('rect')
+                .classed('transition-active', false);
+        }
+    }
+
+    // Update the visualization to show current token counts
+    function updatePlacesWithTokens() {
+        // Update each place based on currentPetriNetState
+        currentPetriNetState.places.forEach(placeState => {
+            const placeNode = nodesMap.get(placeState.id);
+            if (!placeNode) return;
+            
+            const placeElement = d3.select(placeNode.element);
+            
+            // First, make sure the main place circle exists
+            if (placeElement.select('circle').empty()) {
+                // If the main circle is missing, recreate it
+                placeElement.append('circle')
+                    .attr('r', 25)
+                    .attr('fill', 'rgba(200, 200, 255, 0.7)')
+                    .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                    .attr('stroke-width', 2);
+            }
+            
+            // Remove token indicators (second circle or text) but keep the main circle and title text
+            placeElement.selectAll('circle:not(:first-child)').remove();
+            placeElement.selectAll('text:not([dy="-30"])').remove();
+            
+            // Add tokens if any
+            if (placeState.tokens > 0) {
+                if (placeState.tokens === 1) {
+                    placeElement.append('circle')
+                        .attr('r', 5)
+                        .attr('fill', 'rgba(0, 95, 122, 0.8)');
+                } else {
+                    placeElement.append('text')
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', 5)
+                        .attr('font-size', 14)
+                        .attr('font-weight', 'bold')
+                        .attr('fill', '#0a3541')
+                        .text(placeState.tokens);
+                }
+            }
+            
+            // Check if we need to re-add the label
+            if (placeElement.selectAll('text[dy="-30"]').empty()) {
+                placeElement.append('text')
+                    .attr('dy', -30)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#0a3541')
+                    .text(placeState.id);
+            }
+        });
+    }
+
+    // Initialize simulation
+    function initializeSimulation(petriNetData) {
+        // Wait for D3 visualization to fully render
+        setTimeout(() => {
+            // Add simulation controls to the page
+            addSimulationControls();
+            
+            // Save initial state
+            saveInitialState(petriNetData);
+        }, 500);
+    }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const petriNetData = {{ petri_net_data|safe }};
+            
+            // Create nodes and links arrays for D3
+            const nodes = [];
+            const links = [];
+            
+            // Add places as nodes
+            petriNetData.places.forEach(place => {
+                nodes.push({
+                    id: place.id,
+                    name: place.name || place.id,
+                    type: 'place',
+                    tokens: place.tokens || 0
                 });
             });
-        } else {
-            // Normal transition with input places
-            // First animate tokens from input places to transition
-            animateTokensAlongArcs(inputArcs, 'input').then(() => {
-                // Update the data model after input animation
-                transition.from.forEach(placeId => {
-                    const place = currentData.places.find(p => p.id === placeId);
-                    if (place) {
-                        place.tokens = Math.max(0, place.tokens - 1);
-                    }
+            
+            // Add transitions as nodes
+            petriNetData.transitions.forEach(transition => {
+                nodes.push({
+                    id: transition.id,
+                    name: transition.name || transition.id,
+                    type: 'transition'
                 });
                 
+                // Add arcs from places to this transition
+                transition.from.forEach(placeId => {
+                    links.push({
+                        source: placeId,
+                        target: transition.id,
+                        type: 'input'
+                    });
+                });
+                
+                // Add arcs from this transition to places
+                transition.to.forEach(placeId => {
+                    links.push({
+                        source: transition.id,
+                        target: placeId,
+                        type: 'output',
+                        weight: transition.weights ? (transition.weights[placeId] || 1) : 1
+                    });
+                });
+            });
+            
+            // Add weights if available in the arcs array
+            if (petriNetData.arcs && petriNetData.arcs.length) {
+                petriNetData.arcs.forEach(arc => {
+                    // Find the corresponding link
+                    const link = links.find(l => 
+                        l.source === arc.source && 
+                        l.target === arc.target
+                    );
+                    
+                    if (link) {
+                        link.weight = arc.weight || 1;
+                    }
+                });
+            }
+            
+            // Set up SVG container
+            const container = d3.select('.canvas-container');
+            const containerWidth = container.node().getBoundingClientRect().width;
+            const containerHeight = container.node().getBoundingClientRect().height;
+            
+            // Remove any existing SVG (for redraw)
+            container.select('svg').remove();
+            
+            // Create SVG element
+            const svg = container.append('svg')
+                .attr('width', containerWidth)
+                .attr('height', containerHeight)
+                .attr('id', 'petri-net-svg')
+                .call(d3.zoom().on('zoom', function(event) {
+                    g.attr('transform', event.transform);
+                }));
+            
+            // Add a defs section for markers (arrow heads)
+            const defs = svg.append('defs');
+            
+            // Define arrow head for input arcs
+            defs.append('marker')
+                .attr('id', 'input-arrow')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 5)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', 'rgba(0, 95, 122, 0.8)');
+            
+            // Define arrow head for output arcs
+            defs.append('marker')
+                .attr('id', 'output-arrow')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 5)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', 'rgba(81, 101, 64, 0.8)');
+            
+            // Create a group to contain the entire visualization
+            const g = svg.append('g');
+            
+            // Create the force simulation
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-500))
+                .force('center', d3.forceCenter(containerWidth / 2, containerHeight / 2))
+                .force('collision', d3.forceCollide().radius(d => d.type === 'place' ? 35 : 25))
+                .force('x', d3.forceX(containerWidth / 2).strength(0.05))
+                .force('y', d3.forceY(containerHeight / 2).strength(0.05));
+            
+            // Create links (arcs)
+            const link = g.append('g')
+                .attr('class', 'links')
+                .selectAll('path')
+                .data(links)
+                .join('path')
+                .attr('class', 'link')
+                .attr('stroke', d => d.type === 'input' ? 'rgba(0, 95, 122, 0.8)' : 'rgba(81, 101, 64, 0.8)')
+                .attr('stroke-width', 2)
+                .attr('fill', 'none')
+                .attr('marker-end', d => d.type === 'input' ? 'url(#input-arrow)' : 'url(#output-arrow)');
+            
+            // Create weight labels
+            const weightLabel = g.append('g')
+                .attr('class', 'weight-labels')
+                .selectAll('g')
+                .data(links.filter(d => d.weight && d.weight !== 1))
+                .join('g');
+            
+            weightLabel.append('circle')
+                .attr('r', 10)
+                .attr('fill', 'rgba(255, 255, 255, 0.8)');
+            
+            weightLabel.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', 4)
+                .attr('font-size', 12)
+                .attr('font-weight', 'bold')
+                .attr('fill', '#0a3541')
+                .text(d => d.weight);
+            
+            // Create nodes
+            const node = g.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(nodes)
+                .join('g')
+                .attr('class', d => `node ${d.type}`)
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+            
+            // Add tooltips
+            node.append('title')
+                .text(d => `${d.id} (${d.name})`);
+            
+            // Add different shapes for places and transitions
+            node.each(function(d) {
+                const element = d3.select(this);
+                
+                if (d.type === 'place') {
+                    // Create gradient for places
+                    const gradientId = `place-gradient-${d.id.replace(/\s+/g, '-')}`;
+                    const gradient = defs.append('radialGradient')
+                        .attr('id', gradientId)
+                        .attr('cx', '50%')
+                        .attr('cy', '50%')
+                        .attr('r', '50%')
+                        .attr('fx', '50%')
+                        .attr('fy', '50%');
+                        
+                    gradient.append('stop')
+                        .attr('offset', '0%')
+                        .attr('stop-color', 'rgba(255, 255, 255, 0.9)');
+                        
+                    gradient.append('stop')
+                        .attr('offset', '100%')
+                        .attr('stop-color', 'rgba(200, 200, 255, 0.7)');
+                    
+                    // Create place circle
+                    element.append('circle')
+                        .attr('r', 25)
+                        .attr('fill', `url(#${gradientId})`)
+                        .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                        .attr('stroke-width', 2)
+                        .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
+                    
+                    // Add tokens if any
+                    if (d.tokens > 0) {
+                        if (d.tokens === 1) {
+                            element.append('circle')
+                                .attr('r', 5)
+                                .attr('fill', 'rgba(0, 95, 122, 0.8)');
+                        } else {
+                            element.append('text')
+                                .attr('text-anchor', 'middle')
+                                .attr('dy', 5)
+                                .attr('font-size', 14)
+                                .attr('font-weight', 'bold')
+                                .attr('fill', '#0a3541')
+                                .text(d.tokens);
+                        }
+                    }
+                } else {
+                    // Create gradient for transitions
+                    const gradientId = `transition-gradient-${d.id.replace(/\s+/g, '-')}`;
+                    const gradient = defs.append('linearGradient')
+                        .attr('id', gradientId)
+                        .attr('x1', '0%')
+                        .attr('y1', '0%')
+                        .attr('x2', '100%')
+                        .attr('y2', '100%');
+                        
+                    gradient.append('stop')
+                        .attr('offset', '0%')
+                        .attr('stop-color', 'rgba(81, 101, 64, 0.8)');
+                        
+                    gradient.append('stop')
+                        .attr('offset', '100%')
+                        .attr('stop-color', 'rgba(81, 101, 64, 0.6)');
+                    
+                    // Create transition rectangle
+                    element.append('rect')
+                        .attr('x', -15)
+                        .attr('y', -10)
+                        .attr('width', 30)
+                        .attr('height', 20)
+                        .attr('fill', `url(#${gradientId})`)
+                        .attr('stroke', 'rgba(81, 101, 64, 0.9)')
+                        .attr('stroke-width', 2)
+                        .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
+                }
+                
+                // Add label
+                element.append('text')
+                    .attr('dy', d => d.type === 'place' ? -30 : -15)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#0a3541')
+                    .text(d.id);
+            });
+            
+            // Helper function to calculate a point along a quadratic Bezier curve
+            function pointOnQuadraticBezier(p0, p1, p2, t) {
+                const x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
+                const y = (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y;
+                return { x, y };
+            }
+            
+            // Update link positions during simulation
+            simulation.on('tick', () => {
+                // Update links with curved paths
+                link.attr('d', d => {
+                    // Get source and target coordinates
+                    const sourceNode = nodes.find(n => n.id === d.source.id || n.id === d.source);
+                    const targetNode = nodes.find(n => n.id === d.target.id || n.id === d.target);
+                    
+                    if (!sourceNode || !targetNode) return '';
+                    
+                    // Extract coordinates
+                    const sourceX = sourceNode.x;
+                    const sourceY = sourceNode.y;
+                    const targetX = targetNode.x;
+                    const targetY = targetNode.y;
+                    
+                    // Calculate midpoint
+                    const midX = (sourceX + targetX) / 2;
+                    const midY = (sourceY + targetY) / 2;
+                    
+                    // Calculate distance
+                    const dx = targetX - sourceX;
+                    const dy = targetY - sourceY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Adjust curvature based on distance
+                    let curvature = 0;
+                    if (distance > 150) {
+                        curvature = 0.2;
+                    } else if (distance > 80) {
+                        curvature = 0.1;
+                    }
+                    
+                    // Calculate control point offset perpendicular to the line
+                    const offsetX = -dy * curvature;
+                    const offsetY = dx * curvature;
+                    
+                    // Calculate control point
+                    const controlX = midX + offsetX;
+                    const controlY = midY + offsetY;
+                    
+                    // Start and end nodes have different radii
+                    const sourceRadius = sourceNode.type === 'place' ? 25 : 15;
+                    const targetRadius = targetNode.type === 'place' ? 25 : 15;
+                    
+                    // Calculate the angle to adjust start and end points
+                    const angle = Math.atan2(targetY - sourceY, targetX - sourceX);
+                    
+                    // Adjust start and end points to begin/end at the node perimeter
+                    const startX = sourceX + (sourceRadius * Math.cos(angle));
+                    const startY = sourceY + (sourceRadius * Math.sin(angle));
+                    
+                    // For the target, we need to move inward from the edge a bit to accommodate the arrowhead
+                    const endX = targetX - ((targetRadius + 5) * Math.cos(angle));
+                    const endY = targetY - ((targetRadius + 5) * Math.sin(angle));
+                    
+                    // Store path parameters on the data for weight label positioning
+                    d.pathParams = {
+                        start: { x: startX, y: startY },
+                        control: { x: controlX, y: controlY },
+                        end: { x: endX, y: endY }
+                    };
+                    
+                    // Generate curved path
+                    return `M${startX},${startY} Q${controlX},${controlY} ${endX},${endY}`;
+                });
+                
+                // Update weight labels - FIXED to be on the curve
+                weightLabel.attr('transform', d => {
+                    // If we don't have path parameters yet, skip
+                    if (!d.pathParams) return '';
+                    
+                    // Calculate point on the Bezier curve at t=0.5 (midpoint)
+                    const bezierPoint = pointOnQuadraticBezier(
+                        d.pathParams.start, 
+                        d.pathParams.control, 
+                        d.pathParams.end, 
+                        0.5
+                    );
+                    
+                    return `translate(${bezierPoint.x}, ${bezierPoint.y})`;
+                });
+                
+                // Update node positions
+                node.attr('transform', d => `translate(${d.x}, ${d.y})`);
+            });
+            
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                // Keep node fixed where user dragged it
+                // d.fx = null;
+                // d.fy = null;
+            }
+            
+            // Add legend
+            const legendWidth = 120;
+            const legendHeight = 140;
+            const legendX = containerWidth - legendWidth - 10;
+            const legendY = 10;
+            
+            const legend = svg.append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${legendX}, ${legendY})`);
+            
+            // Legend background
+            legend.append('rect')
+                .attr('width', legendWidth)
+                .attr('height', legendHeight)
+                .attr('rx', 8)
+                .attr('ry', 8)
+                .attr('fill', 'rgba(255, 255, 255, 0.9)')
+                .attr('stroke', 'rgba(0, 0, 0, 0.1)');
+            
+            // Legend title
+            legend.append('text')
+                .attr('x', 10)
+                .attr('y', 20)
+                .attr('font-size', 12)
+                .attr('font-weight', 'bold')
+                .attr('fill', '#0a3541')
+                .text('Legend');
+            
+            // Place legend item
+            const placeLegend = legend.append('g')
+                .attr('transform', 'translate(15, 40)');
+            
+            placeLegend.append('circle')
+                .attr('r', 10)
+                .attr('fill', 'rgba(200, 200, 255, 0.7)')
+                .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                .attr('stroke-width', 2);
+            
+            placeLegend.append('text')
+                .attr('x', 20)
+                .attr('y', 4)
+                .attr('font-size', 12)
+                .attr('fill', '#0a3541')
+                .text('Place');
+            
+            // Transition legend item
+            const transitionLegend = legend.append('g')
+                .attr('transform', 'translate(15, 70)');
+            
+            transitionLegend.append('rect')
+                .attr('x', -10)
+                .attr('y', -7)
+                .attr('width', 20)
+                .attr('height', 14)
+                .attr('fill', 'rgba(81, 101, 64, 0.8)')
+                .attr('stroke', 'rgba(81, 101, 64, 0.9)')
+                .attr('stroke-width', 2);
+            
+            transitionLegend.append('text')
+                .attr('x', 20)
+                .attr('y', 4)
+                .attr('font-size', 12)
+                .attr('fill', '#0a3541')
+                .text('Transition');
+            
+            // Input arc legend item
+            const inputArcLegend = legend.append('g')
+                .attr('transform', 'translate(15, 100)');
+            
+            inputArcLegend.append('line')
+                .attr('x1', -10)
+                .attr('y1', 0)
+                .attr('x2', 10)
+                .attr('y2', 0)
+                .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                .attr('stroke-width', 2)
+                .attr('marker-end', 'url(#input-arrow)');
+            
+            inputArcLegend.append('text')
+                .attr('x', 20)
+                .attr('y', 4)
+                .attr('font-size', 12)
+                .attr('fill', '#0a3541')
+                .text('Input Arc');
+            
+            // Output arc legend item
+            const outputArcLegend = legend.append('g')
+                .attr('transform', 'translate(15, 130)');
+            
+            outputArcLegend.append('line')
+                .attr('x1', -10)
+                .attr('y1', 0)
+                .attr('x2', 10)
+                .attr('y2', 0)
+                .attr('stroke', 'rgba(81, 101, 64, 0.8)')
+                .attr('stroke-width', 2)
+                .attr('marker-end', 'url(#output-arrow)');
+            
+            outputArcLegend.append('text')
+                .attr('x', 20)
+                .attr('y', 4)
+                .attr('font-size', 12)
+                .attr('fill', '#0a3541')
+                .text('Output Arc');
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                // Check if user agent is mobile
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                
+                if (!isMobile) {
+                    // Get new dimensions
+                    const newWidth = container.node().getBoundingClientRect().width;
+                    const newHeight = container.node().getBoundingClientRect().height;
+                    
+                    // Update SVG size
+                    svg.attr('width', newWidth)
+                    .attr('height', newHeight);
+                    
+                    // Update forces
+                    simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
+                            .force('x', d3.forceX(newWidth / 2).strength(0.05))
+                            .force('y', d3.forceY(newHeight / 2).strength(0.05))
+                            .alpha(0.3)
+                            .restart();
+                    
+                    // Move legend
+                    legend.attr('transform', `translate(${newWidth - legendWidth - 10}, 10)`);
+                }
+            });
+            
+            
+            // Add CSS styles for D3 elements
+            const style = document.createElement('style');
+            style.textContent = `
+                .canvas-container {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                }
+                
+                #petri-net-svg {
+                    background-color: transparent;
+                    cursor: move;
+                }
+                
+                .node {
+                    cursor: pointer;
+                }
+                
+                .node:hover text {
+                    font-weight: bold;
+                }
+                
+                .link {
+                    pointer-events: none;
+                }
+            `;
+
+            
+            document.head.appendChild(style);
+
+            // Initialize simulation after the visualization is set up
+            setTimeout(() => {
+                const petriNetData = {{ petri_net_data|safe }};
+                initPetriNetSimulation(petriNetData);
+            }, 1000);
+
+    // Add a flag to control the debug output
+    const DEBUG_MODE = false;
+
+    // This function runs after your existing D3 visualization is set up
+    function initPetriNetSimulation(petriNetData) {
+        // Store the original data safely
+        const originalData = JSON.parse(JSON.stringify(petriNetData));
+        let currentData = JSON.parse(JSON.stringify(petriNetData));
+        let simulationInterval = null;
+        let isSimulationRunning = false;
+        
+        // Add control buttons
+        addSimulationControls();
+        
+        // CONTROL FUNCTIONS
+        function addSimulationControls() {
+            const container = d3.select('.canvas-container');
+            
+            // Remove existing controls if any
+            container.select('.simulation-controls').remove();
+            
+            const controlsDiv = container.append('div')
+                .attr('class', 'simulation-controls')
+                .style('position', 'absolute')
+                .style('bottom', '10px')
+                .style('left', '10px')
+                .style('background-color', 'rgba(255, 255, 255, 0.9)')
+                .style('padding', '12px')
+                .style('border-radius', '6px')
+                .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.2)');
+            
+            // Add simulation buttons
+            controlsDiv.append('button')
+                .attr('id', 'start-sim')
+                .attr('class', 'sim-button')
+                .text('Start')
+                .on('click', startSimulation);
+            
+            controlsDiv.append('button')
+                .attr('id', 'stop-sim')
+                .attr('class', 'sim-button')
+                .text('Stop')
+                .style('margin-left', '5px')
+                .on('click', stopSimulation);
+            
+            controlsDiv.append('button')
+                .attr('id', 'step-sim')
+                .attr('class', 'sim-button')
+                .text('Step')
+                .style('margin-left', '5px')
+                .on('click', stepSimulation);
+            
+            controlsDiv.append('button')
+                .attr('id', 'reset-sim')
+                .attr('class', 'sim-button')
+                .text('Reset')
+                .style('margin-left', '5px')
+                .on('click', resetSimulation);
+            
+            // Add speed control slider
+            controlsDiv.append('span')
+                .text('Speed: ')
+                .style('margin-left', '10px');
+            
+            controlsDiv.append('input')
+                .attr('id', 'sim-speed')
+                .attr('type', 'range')
+                .attr('min', '100')
+                .attr('max', '2000')
+                .attr('value', '500')
+                .attr('step', '100')
+                .style('vertical-align', 'middle');
+        }
+        
+        function startSimulation() {
+            if (isSimulationRunning) return;
+            
+            isSimulationRunning = true;
+            
+            // Disable start and step buttons
+            d3.select('#start-sim').property('disabled', true);
+            d3.select('#step-sim').property('disabled', true);
+            
+            // Get simulation speed from slider
+            const speed = parseInt(d3.select('#sim-speed').property('value'));
+            
+            // Clear any existing interval
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+            }
+            
+            // Set interval for automatic simulation steps
+            simulationInterval = setInterval(() => {
+                const fired = performSimulationStep();
+                
+                // If no transitions can fire, stop simulation
+                if (!fired) {
+                    stopSimulation();
+                    alert('Simulation stopped: No enabled transitions');
+                }
+            }, speed);
+        }
+        
+        function stopSimulation() {
+            // Clear the interval
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            
+            isSimulationRunning = false;
+            
+            // Re-enable start and step buttons
+            d3.select('#start-sim').property('disabled', false);
+            d3.select('#step-sim').property('disabled', false);
+        }
+        
+        function stepSimulation() {
+            if (isSimulationRunning) return;
+            performSimulationStep();
+        }
+        
+        function resetSimulation() {
+            // Stop any running simulation
+            stopSimulation();
+            
+            // Remove any animation tokens
+            d3.select('#petri-net-svg').selectAll('.token-animation').remove();
+            
+            // Reset to original data
+            currentData = JSON.parse(JSON.stringify(originalData));
+            
+            // Apply the new data to visualization
+            applyDataToVisualization(currentData);
+        }
+        
+        // SIMULATION LOGIC
+        function performSimulationStep() {
+            if (isSimulationRunning && d3.selectAll('.token-animation').size() > 0) {
+                // Don't start a new step if animations are still running
+                return true;
+            }
+            
+            // Find all enabled transitions
+            const enabledTransitions = findEnabledTransitions();
+            
+            if (DEBUG_MODE) {
+                console.log("Enabled transitions:", enabledTransitions);
+            }
+            
+            // If no transitions are enabled, return false
+            if (enabledTransitions.length === 0) {
+                return false;
+            }
+            
+            // Randomly select one of the enabled transitions
+            const randomIndex = Math.floor(Math.random() * enabledTransitions.length);
+            const selectedTransition = enabledTransitions[randomIndex];
+            
+            if (DEBUG_MODE) {
+                console.log("Selected transition:", selectedTransition);
+            }
+            
+            // Fire the selected transition
+            fireTransition(selectedTransition);
+            
+            return true;
+        }
+        
+        function findEnabledTransitions() {
+            const enabledTransitions = [];
+            
+            currentData.transitions.forEach(transition => {
+                // Check if this is a source transition (no input places)
+                const isSourceTransition = transition.from.length === 0;
+                
+                if (isSourceTransition) {
+                    // Source transitions can always fire
+                    enabledTransitions.push(transition);
+                } else {
+                    // Normal transition - check if all input places have enough tokens
+                    const isEnabled = transition.from.every(placeId => {
+                        const place = currentData.places.find(p => p.id === placeId);
+                        return place && place.tokens > 0;
+                    });
+                    
+                    if (isEnabled) {
+                        enabledTransitions.push(transition);
+                    }
+                }
+            });
+            
+            return enabledTransitions;
+        }
+        
+        function fireTransition(transition) {
+            if (DEBUG_MODE) {
+                console.log("Firing transition:", transition.id);
+            }
+            
+            // Highlight the transition
+            highlightTransition(transition.id);
+            
+            // Find the relevant arcs for animation
+            const inputArcs = getInputArcs(transition);
+            const outputArcs = getOutputArcs(transition);
+            
+            // If this is a source transition (no input places), just animate the outputs
+            if (transition.from.length === 0) {
                 // Flash the transition
                 flashTransition(transition.id).then(() => {
-                    // Then animate tokens from transition to output places
+                    // Animate tokens from transition to output places
                     animateTokensAlongArcs(outputArcs, 'output').then(() => {
                         // Update the data model after output animation
                         transition.to.forEach(placeId => {
@@ -1424,82 +1398,102 @@ function initPetriNetSimulation(petriNetData) {
                         }, 200);
                     });
                 });
-            });
-        }
-    }
-    
-    // Find the arcs (paths) from input places to a transition
-    function getInputArcs(transition) {
-        const arcs = [];
-        const svg = d3.select('#petri-net-svg');
-        
-        transition.from.forEach(placeId => {
-            const arc = svg.select(`.link[source-id="${placeId}"][target-id="${transition.id}"]`);
-            
-            if (!arc.empty()) {
-                arcs.push({
-                    element: arc.node(),
-                    placeId: placeId,
-                    transitionId: transition.id,
-                    direction: 'input'
-                });
-            } else if (DEBUG_MODE) {
-                console.log(`Could not find arc from ${placeId} to ${transition.id}`);
-            }
-        });
-        
-        if (arcs.length === 0) {
-            // If we couldn't find arcs by attributes, try to find by checking source/target data
-            svg.selectAll('.link').each(function() {
-                const link = d3.select(this);
-                // Add data attributes for future selections
-                if (!link.attr('source-id')) {
-                    // Try to extract from the d attribute or other data
-                    const d = link.datum();
-                    if (d && d.source && d.target) {
-                        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
-                        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
-                        
-                        link.attr('source-id', sourceId);
-                        link.attr('target-id', targetId);
-                        
-                        if (transition.from.includes(sourceId) && targetId === transition.id) {
-                            arcs.push({
-                                element: this,
-                                placeId: sourceId,
-                                transitionId: transition.id,
-                                direction: 'input'
-                            });
+            } else {
+                // Normal transition with input places
+                // First animate tokens from input places to transition
+                animateTokensAlongArcs(inputArcs, 'input').then(() => {
+                    // Update the data model after input animation
+                    transition.from.forEach(placeId => {
+                        const place = currentData.places.find(p => p.id === placeId);
+                        if (place) {
+                            place.tokens = Math.max(0, place.tokens - 1);
                         }
-                    }
+                    });
+                    
+                    // Flash the transition
+                    flashTransition(transition.id).then(() => {
+                        // Then animate tokens from transition to output places
+                        animateTokensAlongArcs(outputArcs, 'output').then(() => {
+                            // Update the data model after output animation
+                            transition.to.forEach(placeId => {
+                                const place = currentData.places.find(p => p.id === placeId);
+                                if (place) {
+                                    place.tokens += 1;
+                                }
+                            });
+                            
+                            // Update the visualization with new token counts
+                            applyDataToVisualization(currentData);
+                            
+                            // Unhighlight the transition
+                            setTimeout(() => {
+                                unhighlightTransition(transition.id);
+                            }, 200);
+                        });
+                    });
+                });
+            }
+        }
+        
+        // Find the arcs (paths) from input places to a transition
+        function getInputArcs(transition) {
+            const arcs = [];
+            const svg = d3.select('#petri-net-svg');
+            
+            transition.from.forEach(placeId => {
+                const arc = svg.select(`.link[source-id="${placeId}"][target-id="${transition.id}"]`);
+                
+                if (!arc.empty()) {
+                    arcs.push({
+                        element: arc.node(),
+                        placeId: placeId,
+                        transitionId: transition.id,
+                        direction: 'input'
+                    });
+                } else if (DEBUG_MODE) {
+                    console.log(`Could not find arc from ${placeId} to ${transition.id}`);
                 }
             });
+            
+            if (arcs.length === 0) {
+                // If we couldn't find arcs by attributes, try to find by checking source/target data
+                svg.selectAll('.link').each(function() {
+                    const link = d3.select(this);
+                    // Add data attributes for future selections
+                    if (!link.attr('source-id')) {
+                        // Try to extract from the d attribute or other data
+                        const d = link.datum();
+                        if (d && d.source && d.target) {
+                            const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                            const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                            
+                            link.attr('source-id', sourceId);
+                            link.attr('target-id', targetId);
+                            
+                            if (transition.from.includes(sourceId) && targetId === transition.id) {
+                                arcs.push({
+                                    element: this,
+                                    placeId: sourceId,
+                                    transitionId: transition.id,
+                                    direction: 'input'
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+            
+            return arcs;
         }
         
-        return arcs;
-    }
-    
-    // Find the arcs (paths) from a transition to output places
-    function getOutputArcs(transition) {
-        const arcs = [];
-        const svg = d3.select('#petri-net-svg');
-        
-        transition.to.forEach(placeId => {
-            // First try to find arc where transition is source and place is target
-            let arc = svg.select(`.link[source-id="${transition.id}"][target-id="${placeId}"]`);
+        // Find the arcs (paths) from a transition to output places
+        function getOutputArcs(transition) {
+            const arcs = [];
+            const svg = d3.select('#petri-net-svg');
             
-            if (!arc.empty()) {
-                arcs.push({
-                    element: arc.node(),
-                    placeId: placeId,
-                    transitionId: transition.id,
-                    direction: 'output',
-                    reversed: false  // Path goes from transition to place
-                });
-            } else {
-                // If not found, try to find the reverse path (place to transition)
-                // and we'll need to reverse the animation direction
-                arc = svg.select(`.link[source-id="${placeId}"][target-id="${transition.id}"]`);
+            transition.to.forEach(placeId => {
+                // First try to find arc where transition is source and place is target
+                let arc = svg.select(`.link[source-id="${transition.id}"][target-id="${placeId}"]`);
                 
                 if (!arc.empty()) {
                     arcs.push({
@@ -1507,422 +1501,435 @@ function initPetriNetSimulation(petriNetData) {
                         placeId: placeId,
                         transitionId: transition.id,
                         direction: 'output',
-                        reversed: true  // Path goes from place to transition, need to reverse animation
+                        reversed: false  // Path goes from transition to place
                     });
-                } else if (DEBUG_MODE) {
-                    console.log(`Could not find arc between ${transition.id} and ${placeId}`);
-                }
-            }
-        });
-        
-        if (arcs.length === 0) {
-            // If we couldn't find arcs by attributes, try to find by checking source/target data
-            svg.selectAll('.link').each(function() {
-                const link = d3.select(this);
-                // Add data attributes for future selections
-                if (!link.attr('source-id')) {
-                    // Try to extract from the d attribute or other data
-                    const d = link.datum();
-                    if (d && d.source && d.target) {
-                        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
-                        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
-                        
-                        link.attr('source-id', sourceId);
-                        link.attr('target-id', targetId);
-                        
-                        // Check if this is transition -> place
-                        if (sourceId === transition.id && transition.to.includes(targetId)) {
-                            arcs.push({
-                                element: this,
-                                placeId: targetId,
-                                transitionId: transition.id,
-                                direction: 'output',
-                                reversed: false
-                            });
-                        }
-                        // Check if this is place -> transition (need to reverse)
-                        else if (targetId === transition.id && transition.to.includes(sourceId)) {
-                            arcs.push({
-                                element: this,
-                                placeId: sourceId,
-                                transitionId: transition.id,
-                                direction: 'output',
-                                reversed: true
-                            });
-                        }
+                } else {
+                    // If not found, try to find the reverse path (place to transition)
+                    // and we'll need to reverse the animation direction
+                    arc = svg.select(`.link[source-id="${placeId}"][target-id="${transition.id}"]`);
+                    
+                    if (!arc.empty()) {
+                        arcs.push({
+                            element: arc.node(),
+                            placeId: placeId,
+                            transitionId: transition.id,
+                            direction: 'output',
+                            reversed: true  // Path goes from place to transition, need to reverse animation
+                        });
+                    } else if (DEBUG_MODE) {
+                        console.log(`Could not find arc between ${transition.id} and ${placeId}`);
                     }
                 }
             });
-        }
-        
-        return arcs;
-    }
-    
-    // Animate tokens along the arcs
-    function animateTokensAlongArcs(arcs, direction) {
-        return new Promise(resolve => {
+            
             if (arcs.length === 0) {
-                resolve();
-                return;
-            }
-            
-            const svg = d3.select('#petri-net-svg');
-            const g = svg.select('g'); // Get the main group
-            
-            // Create tokens for each arc
-            let animationCount = 0;
-            let completedAnimations = 0;
-            
-            arcs.forEach(arc => {
-                if (!arc.element) return;
-                
-                const path = d3.select(arc.element);
-                const pathLength = path.node().getTotalLength();
-                
-                // Create a token element
-                const token = g.append('circle')
-                    .attr('class', 'token-animation')
-                    .attr('r', 5)
-                    .attr('fill', 'rgba(255, 87, 34, 0.8)')
-                    .style('filter', 'drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5))')
-                    .style('pointer-events', 'none');
-                
-                animationCount++;
-                
-                // Animate the token along the path
-                const duration = direction === 'input' ? 600 : 800;
-                let startPos = 0;
-                let endPos = 1;
-                
-                // Check if we need to reverse the animation direction for output arcs
-                if (direction === 'output' && arc.reversed) {
-                    // If the path goes from place to transition but we want to animate from transition to place
-                    startPos = 1;
-                    endPos = 0;
-                }
-                
-                // Start animation
-                animateAlongPath(token, path, startPos, endPos, duration, () => {
-                    token.remove();
-                    completedAnimations++;
-                    if (completedAnimations === animationCount) {
-                        resolve();
+                // If we couldn't find arcs by attributes, try to find by checking source/target data
+                svg.selectAll('.link').each(function() {
+                    const link = d3.select(this);
+                    // Add data attributes for future selections
+                    if (!link.attr('source-id')) {
+                        // Try to extract from the d attribute or other data
+                        const d = link.datum();
+                        if (d && d.source && d.target) {
+                            const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                            const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                            
+                            link.attr('source-id', sourceId);
+                            link.attr('target-id', targetId);
+                            
+                            // Check if this is transition -> place
+                            if (sourceId === transition.id && transition.to.includes(targetId)) {
+                                arcs.push({
+                                    element: this,
+                                    placeId: targetId,
+                                    transitionId: transition.id,
+                                    direction: 'output',
+                                    reversed: false
+                                });
+                            }
+                            // Check if this is place -> transition (need to reverse)
+                            else if (targetId === transition.id && transition.to.includes(sourceId)) {
+                                arcs.push({
+                                    element: this,
+                                    placeId: sourceId,
+                                    transitionId: transition.id,
+                                    direction: 'output',
+                                    reversed: true
+                                });
+                            }
+                        }
                     }
                 });
-            });
-            
-            // If no animations were created, resolve immediately
-            if (animationCount === 0) {
-                resolve();
             }
-        });
-    }
-    
-    // Helper function to animate an element along a path
-    function animateAlongPath(element, path, startPos, endPos, duration, callback) {
-        const pathNode = path.node();
-        if (!pathNode) {
-            if (callback) callback();
-            return;
+            
+            return arcs;
         }
         
-        const pathLength = pathNode.getTotalLength();
-        const start = pathLength * startPos;
-        const end = pathLength * endPos;
+        // Animate tokens along the arcs
+        function animateTokensAlongArcs(arcs, direction) {
+            return new Promise(resolve => {
+                if (arcs.length === 0) {
+                    resolve();
+                    return;
+                }
+                
+                const svg = d3.select('#petri-net-svg');
+                const g = svg.select('g'); // Get the main group
+                
+                // Create tokens for each arc
+                let animationCount = 0;
+                let completedAnimations = 0;
+                
+                arcs.forEach(arc => {
+                    if (!arc.element) return;
+                    
+                    const path = d3.select(arc.element);
+                    const pathLength = path.node().getTotalLength();
+                    
+                    // Create a token element
+                    const token = g.append('circle')
+                        .attr('class', 'token-animation')
+                        .attr('r', 5)
+                        .attr('fill', 'rgba(255, 87, 34, 0.8)')
+                        .style('filter', 'drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5))')
+                        .style('pointer-events', 'none');
+                    
+                    animationCount++;
+                    
+                    // Animate the token along the path
+                    const duration = direction === 'input' ? 600 : 800;
+                    let startPos = 0;
+                    let endPos = 1;
+                    
+                    // Check if we need to reverse the animation direction for output arcs
+                    if (direction === 'output' && arc.reversed) {
+                        // If the path goes from place to transition but we want to animate from transition to place
+                        startPos = 1;
+                        endPos = 0;
+                    }
+                    
+                    // Start animation
+                    animateAlongPath(token, path, startPos, endPos, duration, () => {
+                        token.remove();
+                        completedAnimations++;
+                        if (completedAnimations === animationCount) {
+                            resolve();
+                        }
+                    });
+                });
+                
+                // If no animations were created, resolve immediately
+                if (animationCount === 0) {
+                    resolve();
+                }
+            });
+        }
         
-        let currentPos = start;
-        const step = (end - start) / (duration / 16); // 60fps approximately
-        
-        function animate() {
-            currentPos += step;
-            
-            // Check if animation is complete
-            if ((step > 0 && currentPos >= end) || (step < 0 && currentPos <= end)) {
-                const point = pathNode.getPointAtLength(end);
-                element.attr('cx', point.x).attr('cy', point.y);
+        // Helper function to animate an element along a path
+        function animateAlongPath(element, path, startPos, endPos, duration, callback) {
+            const pathNode = path.node();
+            if (!pathNode) {
                 if (callback) callback();
                 return;
             }
             
-            // Update position
-            const point = pathNode.getPointAtLength(currentPos);
-            element.attr('cx', point.x).attr('cy', point.y);
+            const pathLength = pathNode.getTotalLength();
+            const start = pathLength * startPos;
+            const end = pathLength * endPos;
             
-            // Continue animation
+            let currentPos = start;
+            const step = (end - start) / (duration / 16); // 60fps approximately
+            
+            function animate() {
+                currentPos += step;
+                
+                // Check if animation is complete
+                if ((step > 0 && currentPos >= end) || (step < 0 && currentPos <= end)) {
+                    const point = pathNode.getPointAtLength(end);
+                    element.attr('cx', point.x).attr('cy', point.y);
+                    if (callback) callback();
+                    return;
+                }
+                
+                // Update position
+                const point = pathNode.getPointAtLength(currentPos);
+                element.attr('cx', point.x).attr('cy', point.y);
+                
+                // Continue animation
+                requestAnimationFrame(animate);
+            }
+            
+            // Start with correct position
+            const startPoint = pathNode.getPointAtLength(start);
+            element.attr('cx', startPoint.x).attr('cy', startPoint.y);
+            
+            // Start animation
             requestAnimationFrame(animate);
         }
         
-        // Start with correct position
-        const startPoint = pathNode.getPointAtLength(start);
-        element.attr('cx', startPoint.x).attr('cy', startPoint.y);
+        // Flash animation for transition
+        function flashTransition(transitionId) {
+            return new Promise(resolve => {
+                const transitionElement = d3.select(`.node.transition`).filter(d => d.id === transitionId);
+                const rect = transitionElement.select('rect');
+                
+                // Apply pulse effect
+                rect.classed('pulse-animation', true);
+                
+                // Remove after animation completes
+                setTimeout(() => {
+                    rect.classed('pulse-animation', false);
+                    resolve();
+                }, 300);
+            });
+        }
         
-        // Start animation
-        requestAnimationFrame(animate);
-    }
-    
-    // Flash animation for transition
-    function flashTransition(transitionId) {
-        return new Promise(resolve => {
-            const transitionElement = d3.select(`.node.transition`).filter(d => d.id === transitionId);
-            const rect = transitionElement.select('rect');
+        // VISUALIZATION UPDATES
+        function applyDataToVisualization(data, highlightedTransition = null) {
+            if (DEBUG_MODE) {
+                console.log("Applying data to visualization");
+            }
             
-            // Apply pulse effect
-            rect.classed('pulse-animation', true);
+            // Get all nodes and update their token counts
+            const placeNodes = d3.selectAll('.node.place');
             
-            // Remove after animation completes
-            setTimeout(() => {
-                rect.classed('pulse-animation', false);
-                resolve();
-            }, 300);
+            placeNodes.each(function(d) {
+                if (!d || !d.id) return;
+                
+                const placeElement = d3.select(this);
+                const placeData = data.places.find(p => p.id === d.id);
+                
+                if (!placeData) return;
+                
+                // Update the place's token count in D3 data model
+                d.tokens = placeData.tokens;
+                
+                // Update the visual representation
+                updatePlaceVisualization(placeElement, placeData);
+            });
+            
+            // Apply transition highlight if specified
+            if (highlightedTransition) {
+                highlightTransition(highlightedTransition);
+            }
+        }
+        
+        function updatePlaceVisualization(placeElement, placeData) {
+            if (DEBUG_MODE) {
+                console.log("Updating place:", placeData.id, "with tokens:", placeData.tokens);
+            }
+            
+            // First, ensure the main place circle exists and has the right class
+            let mainCircle = placeElement.select('circle.place-circle');
+            
+            // If we don't have a classed circle, check for the first circle
+            if (mainCircle.empty()) {
+                mainCircle = placeElement.select('circle:first-child');
+                
+                // If we found a circle, add the class to it
+                if (!mainCircle.empty()) {
+                    mainCircle.classed('place-circle', true);
+                } else {
+                    // If no main circle exists at all, recreate it
+                    mainCircle = placeElement.append('circle')
+                        .attr('class', 'place-circle')
+                        .attr('r', 25)
+                        .attr('fill', 'rgba(200, 200, 255, 0.7)')
+                        .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                        .attr('stroke-width', 2);
+                    
+                    if (DEBUG_MODE) {
+                        console.log("Had to recreate main circle for place:", placeData.id);
+                    }
+                }
+            }
+            
+            // IMPORTANT: Only remove elements that are specifically token representations
+            // Do NOT remove any other elements to avoid breaking the visualization
+            placeElement.selectAll('.token-representation').remove();
+            
+            // Check if we have any unlabeled token circles (created before our class system)
+            placeElement.selectAll('circle').each(function() {
+                const circle = d3.select(this);
+                // Don't touch the main circle
+                if (!circle.classed('place-circle') && this !== mainCircle.node()) {
+                    // This is likely a token circle - remove it
+                    circle.remove();
+                }
+            });
+            
+            // Check for unlabeled token text elements (looking at positioning)
+            placeElement.selectAll('text').each(function() {
+                const text = d3.select(this);
+                if (text.attr('dy') === '5' || text.attr('dy') === '4' || text.attr('dy') === '3') {
+                    // This is likely a token count text - remove it
+                    text.remove();
+                }
+            });
+            
+            // Add tokens if any
+            if (placeData.tokens > 0) {
+                if (placeData.tokens === 1) {
+                    placeElement.append('circle')
+                        .attr('class', 'token-representation')
+                        .attr('r', 5)
+                        .attr('fill', 'rgba(0, 95, 122, 0.8)');
+                } else {
+                    placeElement.append('text')
+                        .attr('class', 'token-representation')
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', 5)
+                        .attr('font-size', 14)
+                        .attr('font-weight', 'bold')
+                        .attr('fill', '#0a3541')
+                        .text(placeData.tokens);
+                }
+            }
+            
+            // Make sure the place label exists
+            let placeLabel = placeElement.select('.place-label');
+            if (placeLabel.empty()) {
+                // Look for a text element that might be a label (typically with dy=-30)
+                placeLabel = placeElement.select('text[dy="-30"]');
+                
+                if (!placeLabel.empty()) {
+                    // Found a label, add the class
+                    placeLabel.classed('place-label', true);
+                } else {
+                    // No label found, create one
+                    placeElement.append('text')
+                        .attr('class', 'place-label')
+                        .attr('dy', -30)
+                        .attr('text-anchor', 'middle')
+                        .attr('fill', '#0a3541')
+                        .text(placeData.id);
+                }
+            }
+        }
+        
+        function highlightTransition(transitionId) {
+            d3.selectAll('.node.transition').each(function(d) {
+                if (d && d.id === transitionId) {
+                    d3.select(this).select('rect').classed('transition-active', true);
+                }
+            });
+        }
+        
+        function unhighlightTransition(transitionId) {
+            d3.selectAll('.node.transition').each(function(d) {
+                if (d && d.id === transitionId) {
+                    d3.select(this).select('rect').classed('transition-active', false);
+                }
+            });
+        }
+        
+        // Add CSS styles if not already present
+        function addStyles() {
+            if (!document.getElementById('petri-sim-styles')) {
+                const style = document.createElement('style');
+                style.id = 'petri-sim-styles';
+                style.textContent = `
+                    .simulation-controls {
+                        position: absolute;
+                        bottom: 15px;
+                        left: 15px;
+                        background-color: rgba(255, 255, 255, 0.9);
+                        padding: 12px;
+                        border-radius: 6px;
+                        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+                        z-index: 1000;
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                    }
+                    
+                    .sim-button {
+                        padding: 6px 12px;
+                        border: none;
+                        border-radius: 4px;
+                        background-color: #005F7A;
+                        color: white;
+                        cursor: pointer;
+                        font-weight: bold;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .sim-button:hover {
+                        background-color: #0A3541;
+                        transform: translateY(-1px);
+                    }
+                    
+                    .sim-button:active {
+                        transform: translateY(1px);
+                    }
+                    
+                    .sim-button:disabled {
+                        background-color: #cccccc;
+                        cursor: not-allowed;
+                        transform: none;
+                    }
+                    
+                    .token-animation {
+                        fill: #FF5722;
+                        opacity: 0.8;
+                        filter: drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5));
+                    }
+                    
+                    .transition-active {
+                        stroke: #FF5722;
+                        stroke-width: 3px;
+                        filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
+                    }
+                    
+                    @keyframes pulse {
+                        0% { opacity: 1; }
+                        50% { opacity: 0.5; }
+                        100% { opacity: 1; }
+                    }
+                    
+                    .pulse-animation {
+                        animation: pulse 0.5s ease-in-out;
+                    }
+                    
+                    #sim-speed {
+                        width: 120px;
+                        margin: 0 5px;
+                        vertical-align: middle;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Initialize
+        addStyles();
+        
+        // Initial application of token state
+        applyDataToVisualization(currentData);
+        
+        // Add source-id and target-id attributes to all links for easier selection
+        d3.select('#petri-net-svg').selectAll('.link').each(function() {
+            const link = d3.select(this);
+            if (!link.attr('source-id')) {
+                const d = link.datum();
+                if (d && d.source && d.target) {
+                    const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                    const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                    
+                    link.attr('source-id', sourceId);
+                    link.attr('target-id', targetId);
+                }
+            }
         });
     }
-    
-    // VISUALIZATION UPDATES
-    function applyDataToVisualization(data, highlightedTransition = null) {
-        if (DEBUG_MODE) {
-            console.log("Applying data to visualization");
-        }
-        
-        // Get all nodes and update their token counts
-        const placeNodes = d3.selectAll('.node.place');
-        
-        placeNodes.each(function(d) {
-            if (!d || !d.id) return;
-            
-            const placeElement = d3.select(this);
-            const placeData = data.places.find(p => p.id === d.id);
-            
-            if (!placeData) return;
-            
-            // Update the place's token count in D3 data model
-            d.tokens = placeData.tokens;
-            
-            // Update the visual representation
-            updatePlaceVisualization(placeElement, placeData);
-        });
-        
-        // Apply transition highlight if specified
-        if (highlightedTransition) {
-            highlightTransition(highlightedTransition);
-        }
-    }
-    
-    function updatePlaceVisualization(placeElement, placeData) {
-        if (DEBUG_MODE) {
-            console.log("Updating place:", placeData.id, "with tokens:", placeData.tokens);
-        }
-        
-        // First, ensure the main place circle exists and has the right class
-        let mainCircle = placeElement.select('circle.place-circle');
-        
-        // If we don't have a classed circle, check for the first circle
-        if (mainCircle.empty()) {
-            mainCircle = placeElement.select('circle:first-child');
-            
-            // If we found a circle, add the class to it
-            if (!mainCircle.empty()) {
-                mainCircle.classed('place-circle', true);
-            } else {
-                // If no main circle exists at all, recreate it
-                mainCircle = placeElement.append('circle')
-                    .attr('class', 'place-circle')
-                    .attr('r', 25)
-                    .attr('fill', 'rgba(200, 200, 255, 0.7)')
-                    .attr('stroke', 'rgba(0, 95, 122, 0.8)')
-                    .attr('stroke-width', 2);
-                
-                if (DEBUG_MODE) {
-                    console.log("Had to recreate main circle for place:", placeData.id);
-                }
-            }
-        }
-        
-        // IMPORTANT: Only remove elements that are specifically token representations
-        // Do NOT remove any other elements to avoid breaking the visualization
-        placeElement.selectAll('.token-representation').remove();
-        
-        // Check if we have any unlabeled token circles (created before our class system)
-        placeElement.selectAll('circle').each(function() {
-            const circle = d3.select(this);
-            // Don't touch the main circle
-            if (!circle.classed('place-circle') && this !== mainCircle.node()) {
-                // This is likely a token circle - remove it
-                circle.remove();
-            }
-        });
-        
-        // Check for unlabeled token text elements (looking at positioning)
-        placeElement.selectAll('text').each(function() {
-            const text = d3.select(this);
-            if (text.attr('dy') === '5' || text.attr('dy') === '4' || text.attr('dy') === '3') {
-                // This is likely a token count text - remove it
-                text.remove();
-            }
-        });
-        
-        // Add tokens if any
-        if (placeData.tokens > 0) {
-            if (placeData.tokens === 1) {
-                placeElement.append('circle')
-                    .attr('class', 'token-representation')
-                    .attr('r', 5)
-                    .attr('fill', 'rgba(0, 95, 122, 0.8)');
-            } else {
-                placeElement.append('text')
-                    .attr('class', 'token-representation')
-                    .attr('text-anchor', 'middle')
-                    .attr('dy', 5)
-                    .attr('font-size', 14)
-                    .attr('font-weight', 'bold')
-                    .attr('fill', '#0a3541')
-                    .text(placeData.tokens);
-            }
-        }
-        
-        // Make sure the place label exists
-        let placeLabel = placeElement.select('.place-label');
-        if (placeLabel.empty()) {
-            // Look for a text element that might be a label (typically with dy=-30)
-            placeLabel = placeElement.select('text[dy="-30"]');
-            
-            if (!placeLabel.empty()) {
-                // Found a label, add the class
-                placeLabel.classed('place-label', true);
-            } else {
-                // No label found, create one
-                placeElement.append('text')
-                    .attr('class', 'place-label')
-                    .attr('dy', -30)
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', '#0a3541')
-                    .text(placeData.id);
-            }
-        }
-    }
-    
-    function highlightTransition(transitionId) {
-        d3.selectAll('.node.transition').each(function(d) {
-            if (d && d.id === transitionId) {
-                d3.select(this).select('rect').classed('transition-active', true);
-            }
-        });
-    }
-    
-    function unhighlightTransition(transitionId) {
-        d3.selectAll('.node.transition').each(function(d) {
-            if (d && d.id === transitionId) {
-                d3.select(this).select('rect').classed('transition-active', false);
-            }
-        });
-    }
-    
-    // Add CSS styles if not already present
-    function addStyles() {
-        if (!document.getElementById('petri-sim-styles')) {
-            const style = document.createElement('style');
-            style.id = 'petri-sim-styles';
-            style.textContent = `
-                .simulation-controls {
-                    position: absolute;
-                    bottom: 15px;
-                    left: 15px;
-                    background-color: rgba(255, 255, 255, 0.9);
-                    padding: 12px;
-                    border-radius: 6px;
-                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-                    z-index: 1000;
-                    display: flex;
-                    align-items: center;
-                    flex-wrap: wrap;
-                    gap: 8px;
-                }
-                
-                .sim-button {
-                    padding: 6px 12px;
-                    border: none;
-                    border-radius: 4px;
-                    background-color: #005F7A;
-                    color: white;
-                    cursor: pointer;
-                    font-weight: bold;
-                    transition: all 0.2s ease;
-                }
-                
-                .sim-button:hover {
-                    background-color: #0A3541;
-                    transform: translateY(-1px);
-                }
-                
-                .sim-button:active {
-                    transform: translateY(1px);
-                }
-                
-                .sim-button:disabled {
-                    background-color: #cccccc;
-                    cursor: not-allowed;
-                    transform: none;
-                }
-                
-                .token-animation {
-                    fill: #FF5722;
-                    opacity: 0.8;
-                    filter: drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5));
-                }
-                
-                .transition-active {
-                    stroke: #FF5722;
-                    stroke-width: 3px;
-                    filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
-                }
-                
-                @keyframes pulse {
-                    0% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                    100% { opacity: 1; }
-                }
-                
-                .pulse-animation {
-                    animation: pulse 0.5s ease-in-out;
-                }
-                
-                #sim-speed {
-                    width: 120px;
-                    margin: 0 5px;
-                    vertical-align: middle;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    }
-    
-    // Initialize
-    addStyles();
-    
-    // Initial application of token state
-    applyDataToVisualization(currentData);
-    
-    // Add source-id and target-id attributes to all links for easier selection
-    d3.select('#petri-net-svg').selectAll('.link').each(function() {
-        const link = d3.select(this);
-        if (!link.attr('source-id')) {
-            const d = link.datum();
-            if (d && d.source && d.target) {
-                const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
-                const targetId = typeof d.target === 'object' ? d.target.id : d.target;
-                
-                link.attr('source-id', sourceId);
-                link.attr('target-id', targetId);
-            }
-        }
-    });
-}
 
-// Initialize simulation after the visualization is set up
-setTimeout(() => {
-    const petriNetData = {{ petri_net_data|safe }};
-    initPetriNetSimulation(petriNetData);
-}, 1000);
-    });
+    // Initialize simulation after the visualization is set up
+    setTimeout(() => {
+        const petriNetData = {{ petri_net_data|safe }};
+        initPetriNetSimulation(petriNetData);
+    }, 1000);
+        });
 </script>
 
 {% endblock %}
@@ -1956,6 +1963,13 @@ setTimeout(() => {
 {% block footerTxt %}
 Copyright © DIGIT, Inc. 2025. All rights reserved.
 {% endblock %}
+
+{% block nav1 %} onclick="$('#popupDialog').popup('open');" {% endblock %}
+{% block nav1Text %} Upload another file {% endblock %}
+
+{% block nav2 %} onclick="redirect(2)" {% endblock %}
+{% block nav2Text %} Home {% endblock %}
+
 
 {% block burger1 %} $('#popupDialog').popup('open'); {% endblock %}
 {% block burger1Text %} Import A File {% endblock %}

@@ -81,7 +81,7 @@ function createCanvas(containerId) {
     transitionMerge.append("feMergeNode").attr("in", "SourceGraphic");
     
     // Create transition gradient - enhanced with more stops
-    const transitionGradient = defs.append("radialGradient")
+    const transitionGradient = defs.append("linearGradient")
       .attr("id", "transitionGradient")
       .attr("cx", "50%")
       .attr("cy", "50%")
@@ -89,19 +89,19 @@ function createCanvas(containerId) {
     
     transitionGradient.append("stop")
       .attr("offset", "0%")
-      .attr("stop-color", "rgba(100, 150, 70, 0.8)");
+      .attr("stop-color", "rgba(94, 255, 0, 0.8)");
       
     transitionGradient.append("stop")
       .attr("offset", "40%")
-      .attr("stop-color", "rgba(90, 130, 60, 0.6)");
+      .attr("stop-color", "rgba(111, 255, 0, 0.6)");
     
     transitionGradient.append("stop")
       .attr("offset", "70%")
-      .attr("stop-color", "rgba(81, 110, 64, 0.4)");
+      .attr("stop-color", "rgba(94, 255, 0, 0.4)");
       
     transitionGradient.append("stop")
       .attr("offset", "100%")
-      .attr("stop-color", "rgba(70, 90, 55, 0.2)");
+      .attr("stop-color", "rgba(111, 255, 0, 0.2)");
     
     // Create place gradient - enhanced with more stops
     const placeGradient = defs.append("radialGradient")
