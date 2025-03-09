@@ -143,7 +143,7 @@ html {
 
 }
 
-@media (max-width: 1170px) {
+@media (max-width: 1400px) {
     #centerHeaderText {
         display: none;
     }

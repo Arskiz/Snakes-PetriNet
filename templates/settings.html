@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+<!-- Title on page -->
+{% block pageTitle %} Settings {% endblock %}
+
+{% block head %}
+<!-- Add stylesheet for settings page -->
+<link rel="stylesheet" href="{{ static('assets/style-settings.css') }}"> 
+{% endblock %}
+
+<!-- Main Content -->
+{% block content %}
+<div class="settings-container">
+    <div class="settings-header">
+        <h1>Settings</h1>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Right side of the header -->
+{% block rightHeaderContent %}
+<div class="Hoverable" id="HomeBtn" onclick="redirect(2)">
+    <h1 class="nonSelectable white conChild HeaderElementText">To Snakes CPN</h1>
+    <img
+        src="{{ static('assets/icons/home.png') }}"
+        class="conChild" height="20px" id="Exit-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
+</div>
+
+<div class="Hoverable" id="HomeBtn" onclick="redirect(2)">
+    <h1 class="nonSelectable white conChild HeaderElementText">About</h1>
+    <img
+        src="{{ static('assets/icons/info.png') }}"
+        class="conChild" height="20px" id="Exit-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
+</div>
+{% endblock %}
+
+<!-- Footer -->
+{% block footerTxt %}
+Copyright © DIGIT, Inc. 2025. All rights reserved.
+{% endblock %}
+
+{% block burger2 %} window.location.href='https://www.google.com/' {% endblock %}
+{% block burger2Text %} Exit Site {% endblock %}
+
+{% block burger1 %} redirect(2) {% endblock %}
+{% block burger1Text %} Back to SnakesCPN {% endblock %}
+
+{% block nav2 %} onclick="redirect(2)" {% endblock %}
+{% block nav2Text %} Home {% endblock %}
+
+{% block canvas %}
+<script type="module" src="{{ static('assets/scripts/canvas.js') }}"></script>
+{% endblock %}

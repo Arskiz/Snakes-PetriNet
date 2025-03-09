@@ -123,6 +123,7 @@ function redirect(redirectId) {
         0: "https://www.digit-research.de/digitec-studieren",
         1: "about",
         2: "snakes",
+        3: "settings",
         999: "../../snakes"
     };
 

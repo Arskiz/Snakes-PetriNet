@@ -9,28 +9,38 @@
 }
 
 
-p, span, h1, h2, h3, h4, h5, h6, a, tr, th label{
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
+tr,
+th label {
     font-family: Nunito;
     text-shadow: none !important;
     color: #E2E8F0 !important;
 }
 
-.nowrap{
+.nowrap {
     white-space: nowrap;
 }
 
-.link{
+.link {
     transition: all 0.3s ease;
     white-space: nowrap;
 }
 
-.link:hover{
+.link:hover {
     font-size: 30px;
 }
 
 /* File Upload Popup */
 .file-upload-popup {
-    
+
     background-color: rgb(211, 211, 211) !important;
     border-radius: 12px !important;
     overflow: hidden !important;
@@ -67,6 +77,7 @@ p, span, h1, h2, h3, h4, h5, h6, a, tr, th label{
 
 .popup-content {
     padding: 20px;
+    background-color: #0a3541;
 }
 
 .popup-content p {
@@ -86,12 +97,12 @@ p, span, h1, h2, h3, h4, h5, h6, a, tr, th label{
     display: none;
 }
 
-label{
+label {
     font-family: var(--mercFont);
-    
+
 }
 
-.label{
+.label {
     width: 12em;
     background: linear-gradient(90deg, #005f7a 0%, #516540 100%);
     border-radius: 8px;
@@ -121,7 +132,7 @@ label{
 }
 
 .file-icon {
-    font-size: 20px;
+    font-size: 30px;
 }
 
 .selected-filename {
@@ -147,6 +158,10 @@ label{
     cursor: pointer;
     transition: all 0.3s ease;
     border: none;
+}
+
+#uploadButton {
+    color: #ffffff;
 }
 
 .popup-button.primary {
@@ -182,8 +197,13 @@ label{
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .success-icon {
@@ -203,15 +223,15 @@ label{
 }
 
 .ui-popup-container {
-    transition: all 0.4s ease !important; 
-    position: fixed !important; 
+    transition: all 0.4s ease !important;
+    position: fixed !important;
     width: 400px !important;
     top: 50% !important;
-    left: 50% !important; 
-    transform: translate(-50%, -50%) !important; 
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
 }
 
-hr{
+hr {
     background-color: black;
     border: 1px solid black;
     margin-bottom: 30px;
@@ -434,24 +454,26 @@ html,
     padding: 0;
     color: white;
     font-family: var(--mercFont), 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding-top: 64px; /* Match header height */
-    padding-bottom: 48px; /* Match footer height */
+    padding-top: 64px;
+    /* Match header height */
+    padding-bottom: 48px;
+    /* Match footer height */
     height: 100%;
     width: 100%;
     overflow-x: hidden;
 }
 
-.excSpan{
+.excSpan {
     font-size: 40px;
 }
 
-.container-align-center{
+.container-align-center {
     display: flex !important;
     justify-content: center;
     align-items: center;
 }
 
-.card{
+.card {
     transition: all 0.3s;
     backdrop-filter: blur(5px);
     border-radius: 20px;
@@ -466,31 +488,33 @@ html,
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3)
 }
-.cardUploadImg{
+
+.cardUploadImg {
     position: fixed;
     top: 10%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-.card-text{
+.card-text {
     font-size: 25px;
     position: relative;
     top: 30%;
 }
 
-#supTypes{
+#supTypes {
     align-items: center;
     justify-content: center;
     margin-left: 25px;
-    font-size: 20px;
+    font-size: 30px;
     position: fixed;
-    bottom: 15%;
+    bottom: 20%;
 }
 
-#centerHeaderText{
+#centerHeaderText {
     position: fixed;
     left: 50%;
+    top: 25%;
     transform: translate(-50%);
     font-size: 30px;
     font-family: var(--mercFont);
@@ -508,7 +532,7 @@ html,
     transition: opacity 500ms ease-in;
 }
 
-.mainUploadBTN{
+.mainUploadBTN {
     background: linear-gradient(to right, #00bbff, #0044ff);
     position: fixed;
     bottom: 0%;
@@ -516,7 +540,7 @@ html,
     width: 97%;
 }
 
-.mainPageContent{
+.mainPageContent {
     align-items: center;
     justify-content: center;
 }
@@ -545,14 +569,14 @@ html {
     background-color: rgb(28, 28, 28)
 }
 
-.table{
+.table {
     border-radius: 5px;
     backdrop-filter: blur(10px);
     background: linear-gradient(to right, rgba(0, 0, 0, 0.03), rgba(0, 60, 255, 0.3));
     border: 1px rgba(0, 0, 0, 0.317);
 }
 
-.paddingDiv{
+.paddingDiv {
     height: 50px;
 }
 
@@ -656,7 +680,7 @@ footer {
 
 }
 
-.customBlurredBGText{
+.customBlurredBGText {
     backdrop-filter: blur(5px);
     border-radius: 5px;
 }
@@ -706,7 +730,8 @@ body {
     justify-content: space-between;
 }
 
-.h1, .h2 {
+.h1,
+.h2 {
     margin: auto;
     font-family: Nunito;
     color: rgb(0, 0, 0);
@@ -716,7 +741,7 @@ body {
     backdrop-filter: blur(4px);
 }
 
-.h2{
+.h2 {
     text-decoration: underline 3px rgb(0, 0, 0);
 }
 
@@ -815,7 +840,7 @@ body {
     justify-content: center;
 }
 
-.Hoverable{
+.Hoverable {
     align-items: center;
     justify-content: center;
     -webkit-touch-callout: none;
@@ -828,7 +853,7 @@ body {
 
 
 
-.conChild{
+.conChild {
     align-items: center;
     margin: 0px;
     margin-right: 10px;
@@ -1201,20 +1226,28 @@ body {
 /* The side navigation menu */
 .sidenav {
     backdrop-filter: blur(3px);
-    height: 100%; /* 100% Full-height */
-    width: 0; /* 0 width - change this with JavaScript */
-    position: fixed; /* Stay in place */
-    z-index: 3; /* Stay on top */
-    top: 0; /* Stay at the top */
+    height: 100%;
+    /* 100% Full-height */
+    width: 0;
+    /* 0 width - change this with JavaScript */
+    position: fixed;
+    /* Stay in place */
+    z-index: 3;
+    /* Stay on top */
+    top: 0;
+    /* Stay at the top */
     right: 0;
     background: transparent;
-    overflow-x: hidden; /* Disable horizontal scroll */
-    padding-top: 100px; /* Place content 60px from the top */
-    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
-  }
-  
-  /* The navigation menu links */
-  .sidenav a {
+    overflow-x: hidden;
+    /* Disable horizontal scroll */
+    padding-top: 100px;
+    /* Place content 60px from the top */
+    transition: 0.5s;
+    /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.sidenav a {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
     font-size: 25px;
@@ -1227,15 +1260,15 @@ body {
     margin-right: 10px;
     backdrop-filter: blur(1px);
     margin-top: 5px;
-  }
-  
-  /* When you mouse over the navigation links, change their color */
-  .sidenav a:hover {
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
     color: #f1f1f1;
-  }
-  
-  /* Position and style the close button (top right corner) */
-  .sidenav {
+}
+
+/* Position and style the close button (top right corner) */
+.sidenav {
     position: fixed;
     top: 0 !important;
     right: 0px !important;
@@ -1243,10 +1276,9 @@ body {
     left: auto !important;
     font-size: 36px;
     overflow: hidden !important;
-  }
+}
 
-  .closebtn
-  {
+.closebtn {
     transition: all 0.2s;
     border: none !important;
     border-radius: 5px !important;
@@ -1256,12 +1288,12 @@ body {
     top: 13px !important;
     width: 45px !important;
     height: 45px !important;
-    filter:invert(100%)
-  }
+    filter: invert(100%)
+}
 
-  .closebtn:hover{
+.closebtn:hover {
     filter: invert(70%);
-  }
+}
 
 .footerNavTitle {
     font-size: 25px;
@@ -1274,10 +1306,12 @@ body {
 
 .sidenav-content {
     position: absolute;
-    top: 70px; /* I suggest you use global variables for this */
+    top: 70px;
+    /* I suggest you use global variables for this */
     left: 0%;
     right: 0%;
-    bottom: 70px; /* I suggest you use global variables for this */
+    bottom: 70px;
+    /* I suggest you use global variables for this */
     background: linear-gradient(90deg, rgba(81, 101, 64, 0.7) 0%, rgba(0, 95, 122, 0.8) 100%);
 }
 
@@ -1289,23 +1323,30 @@ body {
 #headerNav {
     position: absolute;
     top: 0;
-    
+
 }
 
-#headerNav, #footerNav {
+#headerNav,
+#footerNav {
     align-items: center;
     justify-content: center;
     left: 0;
     right: 0;
-    height: 70px; /* I suggest you use global variables for this */
-    background: linear-gradient(-90deg,rgba(81, 101, 64, 0.95) 0%, rgba(0, 95, 122, 0.95) 100%);
-}  
+    height: 70px;
+    /* I suggest you use global variables for this */
+    background: linear-gradient(-90deg, rgba(81, 101, 64, 0.95) 0%, rgba(0, 95, 122, 0.95) 100%);
+}
 
-  /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-  @media screen and (max-height: 450px) {
-    .sidenav {padding-top: 15px;}
-    .sidenav a {font-size: 18px;}
-  }
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+    .sidenav {
+        padding-top: 15px;
+    }
+
+    .sidenav a {
+        font-size: 18px;
+    }
+}
 
 @media (max-width: 900px) {
     #HomeText {
@@ -1396,13 +1437,13 @@ body {
 }
 
 @media (max-width: 520px) {
-    .card{
+    .card {
         width: 400px;
     }
 }
 
 @media (max-width: 420px) {
-    .card{
+    .card {
         width: 350px;
     }
 }

@@ -23,16 +23,11 @@ def home(request):
 def about(request):
     return render(request, "webInfo.html")
 
-def net_view(request):
-    context = {
-        'places': places,
-        'transitions': transitions,
-    }
-    print(engines.all())
-    return render(request, "home.html", context)
+def settings(request):
+    return render(request, "settings.html")
 
-def test(request):
-    return render("test.html")  # 🔥 ANNA SE STRINGINÄ HTTP-VASTAUKSENA
+def net_view(request):
+    return render(request, "home.html")
 
 import os
 import time
