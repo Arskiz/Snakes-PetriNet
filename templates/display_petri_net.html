@@ -12,7 +12,7 @@ Petri Net Analysis: {{ filename }}
 <div class="petri-container">
     <div class="petri-header">
         <h1>Petri Net Analysis:</h1>
-        <p id="petri-filename" class="petri-filename" title="File Name: {{ filename }}">{{ filename }}</p>
+        <p id="petri-filename" class="petri-filename" title="Converted to: {{ filename }}"></p>
     </div>
     
     <!-- Visualization Section -->
@@ -601,14 +601,16 @@ Petri Net Analysis: {{ filename }}
                 if (placeState.tokens === 1) {
                     placeElement.append('circle')
                         .attr('r', 5)
-                        .attr('fill', 'rgba(0, 95, 122, 0.8)');
+                        .attr('fill', 'rgba(0, 95, 122, 0.8)')
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1);
                 } else {
                     placeElement.append('text')
                         .attr('text-anchor', 'middle')
                         .attr('dy', 5)
                         .attr('font-size', 14)
                         .attr('font-weight', 'bold')
-                        .attr('fill', '#0a3541')
+                        .attr('fill', '#ffffff')
                         .text(placeState.tokens);
                 }
             }
@@ -618,7 +620,7 @@ Petri Net Analysis: {{ filename }}
                 placeElement.append('text')
                     .attr('dy', -30)
                     .attr('text-anchor', 'middle')
-                    .attr('fill', '#0a3541')
+                    .attr('fill', '#ffffff')
                     .text(placeState.id);
             }
         });
@@ -728,7 +730,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('orient', 'auto')
                 .append('path')
                 .attr('d', 'M0,-5L10,0L0,5')
-                .attr('fill', 'rgba(0, 95, 122, 0.8)');
+                .attr('fill', 'rgba(0, 200, 255, 0.8)');
             
             // Define arrow head for output arcs
             defs.append('marker')
@@ -741,7 +743,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('orient', 'auto')
                 .append('path')
                 .attr('d', 'M0,-5L10,0L0,5')
-                .attr('fill', 'rgba(81, 101, 64, 0.8)');
+                .attr('fill', 'rgba(119, 255, 0, 0.8)');
             
             // Create a group to contain the entire visualization
             const g = svg.append('g');
@@ -762,7 +764,7 @@ Petri Net Analysis: {{ filename }}
                 .data(links)
                 .join('path')
                 .attr('class', 'link')
-                .attr('stroke', d => d.type === 'input' ? 'rgba(0, 95, 122, 0.8)' : 'rgba(81, 101, 64, 0.8)')
+                .attr('stroke', d => d.type === 'input' ? 'rgba(0, 200, 255, 0.8)' : 'rgba(119, 255, 0, 0.8)')
                 .attr('stroke-width', 2)
                 .attr('fill', 'none')
                 .attr('marker-end', d => d.type === 'input' ? 'url(#input-arrow)' : 'url(#output-arrow)');
@@ -776,14 +778,14 @@ Petri Net Analysis: {{ filename }}
             
             weightLabel.append('circle')
                 .attr('r', 10)
-                .attr('fill', 'rgba(255, 255, 255, 0.8)');
+                .attr('fill', 'rgb(138, 138, 138)');
             
             weightLabel.append('text')
                 .attr('text-anchor', 'middle')
                 .attr('dy', 4)
                 .attr('font-size', 12)
                 .attr('font-weight', 'bold')
-                .attr('fill', '#0a3541')
+                .attr('fill', '#ffffff')
                 .text(d => d.weight);
             
             // Create nodes
@@ -810,26 +812,13 @@ Petri Net Analysis: {{ filename }}
                     // Create gradient for places
                     const gradientId = `place-gradient-${d.id.replace(/\s+/g, '-')}`;
                     const gradient = defs.append('radialGradient')
-                        .attr('id', gradientId)
-                        .attr('cx', '50%')
-                        .attr('cy', '50%')
-                        .attr('r', '50%')
-                        .attr('fx', '50%')
-                        .attr('fy', '50%');
-                        
-                    gradient.append('stop')
-                        .attr('offset', '0%')
-                        .attr('stop-color', 'rgba(255, 255, 255, 0.9)');
-                        
-                    gradient.append('stop')
-                        .attr('offset', '100%')
-                        .attr('stop-color', 'rgba(200, 200, 255, 0.7)');
+                        .attr('id', gradientId);
                     
                     // Create place circle
                     element.append('circle')
                         .attr('r', 25)
-                        .attr('fill', `url(#${gradientId})`)
-                        .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                        .attr('fill', 'rgb(104, 159, 254)')
+                        .attr('stroke', 'rgb(32, 114, 255)')
                         .attr('stroke-width', 2)
                         .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
                     
@@ -845,7 +834,7 @@ Petri Net Analysis: {{ filename }}
                                 .attr('dy', 5)
                                 .attr('font-size', 14)
                                 .attr('font-weight', 'bold')
-                                .attr('fill', '#0a3541')
+                                .attr('fill', '#ffffff')
                                 .text(d.tokens);
                         }
                     }
@@ -853,19 +842,7 @@ Petri Net Analysis: {{ filename }}
                     // Create gradient for transitions
                     const gradientId = `transition-gradient-${d.id.replace(/\s+/g, '-')}`;
                     const gradient = defs.append('linearGradient')
-                        .attr('id', gradientId)
-                        .attr('x1', '0%')
-                        .attr('y1', '0%')
-                        .attr('x2', '100%')
-                        .attr('y2', '100%');
-                        
-                    gradient.append('stop')
-                        .attr('offset', '0%')
-                        .attr('stop-color', 'rgba(81, 101, 64, 0.8)');
-                        
-                    gradient.append('stop')
-                        .attr('offset', '100%')
-                        .attr('stop-color', 'rgba(81, 101, 64, 0.6)');
+                        .attr('id', gradientId);
                     
                     // Create transition rectangle
                     element.append('rect')
@@ -873,8 +850,8 @@ Petri Net Analysis: {{ filename }}
                         .attr('y', -10)
                         .attr('width', 30)
                         .attr('height', 20)
-                        .attr('fill', `url(#${gradientId})`)
-                        .attr('stroke', 'rgba(81, 101, 64, 0.9)')
+                        .attr('fill', `rgb(176, 255, 107)`)
+                        .attr('stroke', 'rgba(93, 183, 15, 0.9)')
                         .attr('stroke-width', 2)
                         .attr('filter', 'drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2))');
                 }
@@ -883,7 +860,7 @@ Petri Net Analysis: {{ filename }}
                 element.append('text')
                     .attr('dy', d => d.type === 'place' ? -30 : -15)
                     .attr('text-anchor', 'middle')
-                    .attr('fill', '#0a3541')
+                    .attr('fill', '#ffffff')
                     .text(d.id);
             });
             
@@ -1016,8 +993,8 @@ Petri Net Analysis: {{ filename }}
                 .attr('height', legendHeight)
                 .attr('rx', 8)
                 .attr('ry', 8)
-                .attr('fill', 'rgba(255, 255, 255, 0.9)')
-                .attr('stroke', 'rgba(0, 0, 0, 0.1)');
+                .attr('fill', 'rgb(67, 81, 105)')
+                .attr('stroke', 'rgba(0, 0, 0, 0.2)');
             
             // Legend title
             legend.append('text')
@@ -1025,7 +1002,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('y', 20)
                 .attr('font-size', 12)
                 .attr('font-weight', 'bold')
-                .attr('fill', '#0a3541')
+                .attr('fill', '#ffffff')
                 .text('Legend');
             
             // Place legend item
@@ -1034,15 +1011,15 @@ Petri Net Analysis: {{ filename }}
             
             placeLegend.append('circle')
                 .attr('r', 10)
-                .attr('fill', 'rgba(200, 200, 255, 0.7)')
-                .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                .attr('fill', 'rgb(104, 159, 254)')
+                .attr('stroke', 'rgb(32, 114, 255)')
                 .attr('stroke-width', 2);
             
             placeLegend.append('text')
                 .attr('x', 20)
                 .attr('y', 4)
                 .attr('font-size', 12)
-                .attr('fill', '#0a3541')
+                .attr('fill', '#ffffff')
                 .text('Place');
             
             // Transition legend item
@@ -1054,15 +1031,15 @@ Petri Net Analysis: {{ filename }}
                 .attr('y', -7)
                 .attr('width', 20)
                 .attr('height', 14)
-                .attr('fill', 'rgba(81, 101, 64, 0.8)')
-                .attr('stroke', 'rgba(81, 101, 64, 0.9)')
+                .attr('fill', 'rgba(119, 255, 0, 0.8)')
+                .attr('stroke', 'rgba(54, 116, 0, 0.9)')
                 .attr('stroke-width', 2);
             
             transitionLegend.append('text')
                 .attr('x', 20)
                 .attr('y', 4)
                 .attr('font-size', 12)
-                .attr('fill', '#0a3541')
+                .attr('fill', '#ffffff')
                 .text('Transition');
             
             // Input arc legend item
@@ -1074,7 +1051,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('y1', 0)
                 .attr('x2', 10)
                 .attr('y2', 0)
-                .attr('stroke', 'rgba(0, 95, 122, 0.8)')
+                .attr('stroke', 'rgba(0, 200, 255, 0.8)')
                 .attr('stroke-width', 2)
                 .attr('marker-end', 'url(#input-arrow)');
             
@@ -1082,7 +1059,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('x', 20)
                 .attr('y', 4)
                 .attr('font-size', 12)
-                .attr('fill', '#0a3541')
+                .attr('fill', '#ffffff')
                 .text('Input Arc');
             
             // Output arc legend item
@@ -1094,7 +1071,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('y1', 0)
                 .attr('x2', 10)
                 .attr('y2', 0)
-                .attr('stroke', 'rgba(81, 101, 64, 0.8)')
+                .attr('stroke', 'rgba(119, 255, 0, 0.8)')
                 .attr('stroke-width', 2)
                 .attr('marker-end', 'url(#output-arrow)');
             
@@ -1102,7 +1079,7 @@ Petri Net Analysis: {{ filename }}
                 .attr('x', 20)
                 .attr('y', 4)
                 .attr('font-size', 12)
-                .attr('fill', '#0a3541')
+                .attr('fill', '#ffffff')
                 .text('Output Arc');
             
             // Handle window resize
@@ -1171,7 +1148,7 @@ Petri Net Analysis: {{ filename }}
     // Add a flag to control the debug output
     const DEBUG_MODE = false;
 
-    // This function runs after your existing D3 visualization is set up
+        // This function runs after your existing D3 visualization is set up
     function initPetriNetSimulation(petriNetData) {
         // Store the original data safely
         const originalData = JSON.parse(JSON.stringify(petriNetData));
@@ -1194,7 +1171,6 @@ Petri Net Analysis: {{ filename }}
                 .style('position', 'absolute')
                 .style('bottom', '10px')
                 .style('left', '10px')
-                .style('background-color', 'rgba(255, 255, 255, 0.9)')
                 .style('padding', '12px')
                 .style('border-radius', '6px')
                 .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.2)');
@@ -1734,9 +1710,9 @@ Petri Net Analysis: {{ filename }}
                     mainCircle = placeElement.append('circle')
                         .attr('class', 'place-circle')
                         .attr('r', 25)
-                        .attr('fill', 'rgba(200, 200, 255, 0.7)')
-                        .attr('stroke', 'rgba(0, 95, 122, 0.8)')
-                        .attr('stroke-width', 2);
+                        .attr('fill', 'rgb(104, 159, 254)')
+                        .attr('stroke', 'rgb(32, 114, 255)')
+                        .attr('stroke-width', 3);
                     
                     if (DEBUG_MODE) {
                         console.log("Had to recreate main circle for place:", placeData.id);
@@ -1773,7 +1749,7 @@ Petri Net Analysis: {{ filename }}
                     placeElement.append('circle')
                         .attr('class', 'token-representation')
                         .attr('r', 5)
-                        .attr('fill', 'rgba(0, 95, 122, 0.8)');
+                        .attr('fill', 'rgba(0, 78, 99, 0.8)');
                 } else {
                     placeElement.append('text')
                         .attr('class', 'token-representation')
@@ -1781,7 +1757,7 @@ Petri Net Analysis: {{ filename }}
                         .attr('dy', 5)
                         .attr('font-size', 14)
                         .attr('font-weight', 'bold')
-                        .attr('fill', '#0a3541')
+                        .attr('fill', '#ffffff')
                         .text(placeData.tokens);
                 }
             }
@@ -1801,7 +1777,7 @@ Petri Net Analysis: {{ filename }}
                         .attr('class', 'place-label')
                         .attr('dy', -30)
                         .attr('text-anchor', 'middle')
-                        .attr('fill', '#0a3541')
+                        .attr('fill', '#ffffff')
                         .text(placeData.id);
                 }
             }
@@ -1833,7 +1809,6 @@ Petri Net Analysis: {{ filename }}
                         position: absolute;
                         bottom: 15px;
                         left: 15px;
-                        background-color: rgba(255, 255, 255, 0.9);
                         padding: 12px;
                         border-radius: 6px;
                         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
@@ -1865,7 +1840,8 @@ Petri Net Analysis: {{ filename }}
                     }
                     
                     .sim-button:disabled {
-                        background-color: #cccccc;
+                        background-color:rgb(0, 54, 69);
+                        color:rgb(211, 211, 211);
                         cursor: not-allowed;
                         transform: none;
                     }
@@ -1954,9 +1930,9 @@ Petri Net Analysis: {{ filename }}
         alt="home-icon">
 </div>
 {% endblock %}
-
 {% block canvas %}
 <script type="module" src="{{ static('assets/scripts/canvas.js') }}"></script>
+<script src="{{ static('assets/scripts/pnet_essentials.js') }}"></script>
 {% endblock %}
 
 <!-- Footer -->

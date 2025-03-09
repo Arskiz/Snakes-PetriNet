@@ -12,6 +12,7 @@ let isHamburgerMenuOpened = false;
 // Initializes dropdown handlers on window load
 $(window).on("load", function () {
 
+
     // Clear nav items if their text is empty
     const navContent = $("#mySidenav .sidenav-content");
     const navItems = navContent.find("a");

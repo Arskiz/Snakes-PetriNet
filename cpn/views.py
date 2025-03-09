@@ -88,9 +88,15 @@ def upload_file(request):
             elif result.get('success') and 'file_path' in result:
                 # Add redirect URL to the result
                 filename = os.path.basename(result['file_path'])
-                result['redirect_url'] = request.build_absolute_uri(
-                    reverse('display_petri_net', kwargs={'filename': filename})
-                )
+                # First generate the base URL with reverse()
+                base_url = reverse('display_petri_net', kwargs={'filename': filename})
+
+                # Add the query string
+                base_url_with_query = f"{base_url}?file={unique_filename}"
+
+                # Build the absolute URI
+                result['redirect_url'] = request.build_absolute_uri(base_url_with_query)
+                
                 return JsonResponse(result)
             else:
                 return JsonResponse(result)

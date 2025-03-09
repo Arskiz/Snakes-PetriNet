@@ -22,14 +22,14 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    gap:20px;
+    gap: 20px;
     align-items: center;
     margin: 20px 0;
     padding: 15px 25px;
     background: linear-gradient(120deg, rgba(0, 135, 72, 0.8), rgba(0, 159, 143, 0.4));
     border-radius: 15px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid #394459;
     box-shadow: 0 0 10px inset rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -38,15 +38,16 @@
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 0;
-    color: #0a3541;
+    color: #ffffff;
     text-decoration: none;
     position: relative;
     letter-spacing: 0.8px;
-    text-shadow: 2px 2px 4px rgba(10, 53, 65, 0.15);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     padding-bottom: 8px;
     transition: all 0.3s ease;
     text-align: center;
     user-select: none;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .petri-header h1::after {
@@ -56,7 +57,7 @@
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #0a3541, transparent);
+    background: linear-gradient(90deg, #ffffff, transparent);
     border-radius: 3px;
     box-shadow: 0 2px 6px rgba(10, 53, 65, 0.2);
     transition: width 0.3s ease;
@@ -66,49 +67,62 @@
     width: 70%;
 }
 
+text {
+    color: whitesmoke !important;
+}
+
 .petri-filename {
     font-family: var(--mercFont);
     font-size: 18px;
-    color: #0a3541;
+    color: #0a3541 !important;
     font-style: italic;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(201, 201, 201, 0.5));
     border-radius: 12px;
     padding: 8px 20px;
     backdrop-filter: blur(5px);
-    box-shadow: 
+    box-shadow:
         0 4px 15px rgba(0, 0, 0, 0.05),
         inset 0 0 15px rgba(255, 255, 255, 0.5);
     margin: 0 !important;
     text-align: right;
-    border: 1px solid rgba(255,255,255,0.8);
     transition: all 0.3s ease;
     cursor: pointer;
     text-align: center;
-
 }
 
 .petri-filename:hover {
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.08),
         inset 0 0 20px rgba(255, 255, 255, 0.6);
 
-    background: linear-gradient(65deg, rgba(255,255,255,0.9), rgba(255,255,255,0.5));
+    background: linear-gradient(65deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5));
 
 }
 
-.petri-filename, .petri-header h1, button {
+.data-tabs-section,
+.visualization-section {
+    background-color: #2D3748 !important;
+    border: 1px solid #394459 !important;
+}
+
+.petri-filename,
+.petri-header h1,
+button {
     text-shadow: none !important;
 }
 
 /* Visualization Section */
 .visualization-section {
-    background-color: rgba(255, 255, 255, 0.3);
+    /* background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)); */
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 10px inset rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
 }
 
 .visualization-section h2 {
@@ -123,22 +137,16 @@
 .canvas-container {
     width: 100%;
     backdrop-filter: blur(8px);
-    height: 500px;
+    height: 1000px;
     border-radius: 8px;
     box-shadow: 0 0 30px inset rgba(10, 53, 65, 0.3) !important;
     border: 1px solid rgba(10, 53, 65, 0.2);
     overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.5);
+    /* background-color: rgba(255, 255, 255, 0.5); */
+    background-color: #394459;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
-#petri-net-canvas {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 1;
-    display: block;
-}
 
 /* Data Tabs Section */
 .data-tabs-section {
@@ -156,10 +164,15 @@
     padding: 0;
 }
 
+text {
+    text-shadow: none !important;
+    color: whitesmoke !important;
+}
+
 .tab-button {
     flex: 1;
     padding: 15px 20px;
-    background: transparent!important;
+    background: transparent !important;
     border: 0px !important;
     color: rgb(117, 255, 227) !important;
     font-family: var(--mercFont);
@@ -203,8 +216,13 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Table Styles */
@@ -339,7 +357,7 @@
     position: absolute;
     bottom: 15px;
     left: 15px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: #2D3748 !important;
     padding: 12px;
     border-radius: 6px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
@@ -402,9 +420,17 @@
 
 /* Add a pulse animation for firing transitions */
 @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .pulse-animation {
@@ -416,27 +442,27 @@
     .petri-container {
         padding: 0 10px;
     }
-    
+
     .actions-section {
         flex-direction: column;
         align-items: center;
         gap: 10px;
     }
-    
+
     .action-button {
         width: 100%;
         justify-content: center;
     }
-    
+
     .tab-button {
         padding: 10px;
         font-size: 14px;
     }
-    
+
     .canvas-container {
         height: 400px;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -446,7 +472,7 @@
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .tab-button {
         font-size: 12px;
         padding: 8px 5px;
