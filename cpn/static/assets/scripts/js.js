@@ -1,6 +1,3 @@
-// Is canvas animation checked
-let CanvasAnimation = false;
-
 // State tracking for the main dropdown menu
 const mainDropdownElement = $("#signUpDropDown");
 const hamburgerMenuButton = $("#HeaderRightHamburger");
@@ -22,54 +19,6 @@ $(window).on("load", function () {
             $(this).hide();
         }
     });
-
-    let cV = localStorage.getItem("canvasAnimation");
-    switch (cV) {
-        case null:
-            localStorage.setItem("canvasAnimation", "true");
-            SetCanvas(true);
-            break;
-    }
-    /* THE FOLLOWING CODE IS DEPRECATED AND REPLACED WITH A MORE BEAUTIFIED DESIGN
-    hamburgerMenuButton.on("click", function () {
-        if (!isHamburgerMenuOpened) {
-            hamburgerMenuContent.css("animation", "smoothOpacityIn 1s ease-in-out, growInFromVoid 1s ease-in-out");
-            hamburgerButtonImage.css("transform", "RotateZ(90deg)")
-
-            hamburgerMenuContent.css("display", "flex");
-        } else {
-            hamburgerButtonImage.css("transform", "RotateZ(0deg)")
-            hamburgerMenuContent.css("animation", "growOut 0.5s ease-in-out");
-            setTimeout(() => {
-                hamburgerMenuContent.css("display", "none");
-            }, 500);
-
-        }
-
-        isHamburgerMenuOpened = !isHamburgerMenuOpened;
-    })
-    END OF REMOVED CODE */
-
-    // In future -> add settings stuff for background canvas - START
-    $('#canvasAnimation').click(function () {
-        if (this.checked) {
-            localStorage.setItem("canvasAnimation", "true");
-            createCanvas("body");
-        }
-        else if (!this.checked) {
-            SetCanvas(false);
-            localStorage.setItem("canvasAnimation", "false");
-        }
-    })
-
-    $("[type=range]").change(function () {
-        let newv = $(this).val();
-        $(this).next().text(newv);
-    });;
-
-    $("#amountOfStars").change(function () {
-        localStorage.setItem("bgStarCount", $(this).val());
-    })
 
     // In future -> add settings stuff for background canvas - END
 });
@@ -124,6 +73,7 @@ function redirect(redirectId) {
         1: "about",
         2: "snakes",
         3: "settings",
+        4: "../../settings",
         999: "../../snakes"
     };
 
@@ -136,87 +86,13 @@ function redirect(redirectId) {
     };
 
     Object.values(headerElements).forEach(el => animateElement(el, "smoothToTop", 0.5));
+    
+    let animationType = "growOut"; 
 
-    let animationType = "";
-    switch (activeBodyTextArea) {
-        case "infoHolderChild1":
-        case "archDiv":
-            animationType = "growOut";
-            break;
-        case "HomeText":
-            animationType = "smoothToBottom";
-            break;
-        default:
-            animationType = "growOut";
-    }
-
-    animateElement(document.getElementById(activeBodyTextArea), animationType, 1);
+    animateElement(document.getElementById("archDiv"), animationType, 1);
     animateElement(headerElements.body, "smoothOpacityOut", 0.9, () => {
         window.location.href = urls[redirectId] || "/";
     });
 }
 
-
-// Document ready actions not used (YET, feel free to add as you wish)
-document.addEventListener("DOMContentLoaded", () => {
-    $(document).ready(
-
-        function () {
-            let url = window.location.href;
-            if (url.includes("settings")) {
-                $("#amountOfStars").val(parseInt(localStorage.getItem("bgStarCount")));
-                $("#amountOfStars").next().text(parseInt(localStorage.getItem("bgStarCount")));
-                switch (localStorage.getItem("canvasAnimation")) {
-                    case "true":
-                        $('#canvasAnimation').prop('checked', true);
-                        break;
-
-                    case "false":
-                        $('#canvasAnimation').prop('checked', false);
-                        break;
-                }
-            }
-
-        });
-
-    // Not in use
-    const archiveSuffix = " - DIGITAL TECHNOLOGIES";
-    const titles = {
-        0: "Log In",
-        1: "About",
-        2: "Archive",
-        3: "Register",
-        4: "Upload",
-        5: "Admin Panel",
-        6: "Settings",
-    };
-    var activeSection = null;
-
-    switch (document.title) {
-        case (titles[0] + archiveSuffix || titles[3] + archiveSuffix || titles[4] + archiveSuffix || titles[5] + archiveSuffix || titles[6] + archiveSuffix):
-            activeSection = "infoHolderChild1";
-            break;
-
-        case (titles[1] + archiveSuffix):
-            activeSection = "HomeText";
-            break;
-
-        case (titles[2] + archiveSuffix):
-            activeSection = "archDiv";
-            break;
-    }
-
-    activeBodyTextArea = activeSection;
-})
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Etsi kaikki elementit, joilla on luokka .transition-box
-    const transitions = document.querySelectorAll('.transition-box');
-    transitions.forEach(el => {
-        const topVal = el.getAttribute('data-top');
-        const leftVal = el.getAttribute('data-left');
-        el.style.top = topVal + 'px';
-        el.style.left = leftVal + 'px';
-    });
-});
-// Template created in 2024, Copyright © Aron Särkioja. All rights reserved.
+// Template created in 2024, Copyright © Aron Särkioja to DIGIT-RESEARCH. All rights reserved.

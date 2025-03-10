@@ -56,6 +56,18 @@
     /* Dark teal for main text */
 }
 
+.avatar-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #005f7a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2),
+                0 0 0 3px rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    filter: brightness(1.05) contrast(1.05);
+}
+
 .about-content h3 {
     color: white;
     font-size: 18px;
@@ -64,7 +76,7 @@
     font-weight: 600;
     color: #005f7a;
     /* Slightly lighter for headings */
-    border-bottom: 1px solid rgba(0, 95, 122, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
 }
 
@@ -179,7 +191,7 @@
     /* Updated from light color */
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
 }
 
 /* Tech List */

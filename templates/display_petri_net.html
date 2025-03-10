@@ -18,9 +18,7 @@ Petri Net Analysis: {{ filename }}
     <!-- Visualization Section -->
     <div class="visualization-section">
         <h2>Visual Representation</h2>
-        <div class="canvas-container">
-            
-        </div>
+        <div class="canvas-container"></div>
     </div>
     
     <!-- Data Tabs Section -->
@@ -1919,6 +1917,15 @@ Petri Net Analysis: {{ filename }}
         class="conChild" height="20px"
         style="filter: invert(100%);"
         alt="upload-icon">
+</div>
+
+<div class="Hoverable" id="HomeBtn" onclick="redirect(4)">
+    <h1 class="nonSelectable white conChild HeaderElementText">Settings</h1>
+    <img
+        src="{{ static('assets/icons/settings.png') }}"
+        class="conChild" height="25px" id="Settings-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
 </div>
 
 <div class="Hoverable" id="HomeBtn" onclick="redirect(999)">

@@ -1,22 +1,137 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 // D3.js Petri Net Background Animation
-let svg, stars = [], numStars, drawing = true;
-const FPS = 60;
+let svg, stars = [], drawing = true;
+let resizeTimer;
+
+// Default configuration
+const DEFAULT_CONFIG = {
+  enabled: true,           // Whether animation is enabled
+  starCount: 50,           // Number of nodes
+  fps: 60,                 // Animation frames per second
+  connectionDistance: 150, // Maximum distance for connections
+  mouseInteraction: true,  // Enable mouse interaction
+  clusterEffect: true,     // Group nodes in clusters
+  pulsingEffect: true,     // Enable the pulsing animation 
+  opacity: 1,              // Overall opacity of the animation
+  speedFactor: 1,          // Animation speed multiplier
+  performanceMode: false   // Reduced effects for low-end devices
+};
+
+// Settings that can be customized via localStorage
+let config = { ...DEFAULT_CONFIG };
 const mouse = { x: 0, y: 0 };
 
-function createCanvas(containerId) {
-  if (!svg) {
-    // Get stored star count or use default
-    let storedStars = localStorage.getItem('bgStarCount');
-    numStars = storedStars ? parseInt(storedStars) : 50;
+// Load configuration from localStorage
+function loadConfig() {
+  const storedConfig = localStorage.getItem('petriNetConfig');
+  if (storedConfig) {
+    try {
+      const parsedConfig = JSON.parse(storedConfig);
+      config = { ...DEFAULT_CONFIG, ...parsedConfig };
+    } catch (e) {
+      console.error("Error parsing stored configuration", e);
+      config = { ...DEFAULT_CONFIG };
+    }
+  } else {
+    // Legacy support for older localStorage variables
+    if (localStorage.getItem('bgStarCount')) {
+      config.starCount = parseInt(localStorage.getItem('bgStarCount'));
+    }
+    if (localStorage.getItem('canvasAnimation') !== null) {
+      config.enabled = localStorage.getItem('canvasAnimation') === "true";
+    }
+  }
+}
+
+// Save configuration to localStorage
+function saveConfig() {
+  localStorage.setItem('petriNetConfig', JSON.stringify(config));
+  
+  // Also update legacy values for backward compatibility
+  localStorage.setItem('bgStarCount', config.starCount);
+  localStorage.setItem('canvasAnimation', config.enabled.toString());
+}
+
+// Update a single configuration property
+function updateConfig(property, value) {
+  if (config.hasOwnProperty(property)) {
+    config[property] = value;
+    saveConfig();
     
+    // Apply changes immediately
+    if (property === 'enabled') {
+      setCanvas(value);
+    } else if (property === 'starCount') {
+      createStars();
+    } else if (property === 'opacity' && svg) {
+      svg.style("opacity", value);
+    } else if (property === 'performanceMode') {
+      applyPerformanceMode();
+    } else {
+      // For other properties, just recreate the stars to apply changes
+      if (svg) createStars();
+    }
+  }
+}
+
+// Apply performance mode settings
+function applyPerformanceMode() {
+  if (config.performanceMode) {
+    // Reduce effects for better performance
+    const oldStarCount = config.starCount;
+    config.connectionDistance = 100;
+    config.pulsingEffect = false;
+    
+    // Limit the star count in performance mode
+    if (config.starCount > 30) {
+      config.starCount = 30;
+      // Recreate stars if count changed
+      if (oldStarCount !== 30) {
+        createStars();
+      }
+    }
+    
+    // Disable some filters and effects
+    if (svg) {
+      svg.selectAll(".places circle, .transitions rect")
+        .style("filter", null);
+      
+      // Remove animations
+      const style = document.querySelector('style[data-petri-net-style]');
+      if (style) {
+        style.textContent = `
+          svg.fade-out { opacity: 0; transition: opacity 0.3s ease-out; }
+          svg.fade-in { opacity: 1; transition: opacity 0.3s ease-in; }
+        `;
+      }
+    }
+  } else {
+    // Re-enable full effects
+    if (svg) {
+      svg.selectAll(".places circle")
+        .style("filter", "url(#placeGlow)");
+      
+      svg.selectAll(".transitions rect")
+        .style("filter", "url(#transitionGlow)");
+      
+      // Restore animations
+      updateCSSStyles();
+    }
+  }
+}
+
+function createCanvas(containerId) {
+  // Load configuration from localStorage
+  loadConfig();
+  
+  if (!svg) {
     // Create SVG with D3
     svg = d3.select(`#${containerId}`)
       .append("svg")
       .attr("width", window.innerWidth)
       .attr("height", window.innerHeight)
-      .style("opacity", 0)
+      .style("opacity", config.enabled ? config.opacity : 0)
       .style("position", "absolute")
       .style("top", 0)
       .style("left", 0)
@@ -133,31 +248,85 @@ function createCanvas(containerId) {
     svg.append("g").attr("class", "places");
     svg.append("g").attr("class", "transitions");
     
+    // Add CSS styles
+    updateCSSStyles();
+    
     // Initialize
-    if (localStorage.getItem("canvasAnimation") === "true" || localStorage.getItem("canvasAnimation") === null) {
+    if (config.enabled) {
       createStars();
       
       // Ensure mouse event works with both D3 v5 and v6+
-      try {
-        // D3 v6+ approach
-        d3.select("body").on("mousemove", (event) => {
-          onMouseMove(event);
-        });
-      } catch (e) {
-        // Fallback to D3 v5 approach
-        d3.select("body").on("mousemove", onMouseMove);
+      if (config.mouseInteraction) {
+        try {
+          // D3 v6+ approach
+          d3.select("body").on("mousemove", (event) => {
+            onMouseMove(event);
+          });
+        } catch (e) {
+          // Fallback to D3 v5 approach
+          d3.select("body").on("mousemove", onMouseMove);
+        }
       }
       
       // Fade in animation
       svg.transition()
         .duration(1000)
-        .style("opacity", 1);
+        .style("opacity", config.opacity);
         
+      // Apply performance mode if enabled
+      if (config.performanceMode) {
+        applyPerformanceMode();
+      }
+      
       tick();
     }
   } else {
-    setCanvas(true);
+    setCanvas(config.enabled);
   }
+}
+
+function updateCSSStyles() {
+  // Remove any existing style element
+  const existingStyle = document.querySelector('style[data-petri-net-style]');
+  if (existingStyle) {
+    existingStyle.remove();
+  }
+  
+  // Create a new style element
+  const style = document.createElement('style');
+  style.setAttribute('data-petri-net-style', 'true');
+  
+  let pulseAnimation = '';
+  if (config.pulsingEffect) {
+    pulseAnimation = `
+      @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+      }
+      
+      .places circle {
+        animation: pulse 3s infinite ease-in-out;
+      }
+      
+      .transitions rect {
+        animation: pulse 4s infinite ease-in-out;
+      }
+    `;
+  }
+  
+  style.textContent = `
+    svg.fade-out { opacity: 0; transition: opacity 0.3s ease-out; }
+    svg.fade-in { opacity: 1; transition: opacity 0.3s ease-in; }
+    
+    ${pulseAnimation}
+    
+    .connections line {
+      transition: stroke 0.3s, stroke-width 0.3s;
+    }
+  `;
+  
+  document.head.appendChild(style);
 }
 
 function createStars() {
@@ -168,7 +337,7 @@ function createStars() {
   
   // Create clusters of nodes for more interesting patterns
   let clusterCenters = [];
-  const numClusters = 4;
+  const numClusters = config.clusterEffect ? 4 : 0;
   
   // Create some cluster centers
   for (let i = 0; i < numClusters; i++) {
@@ -178,7 +347,7 @@ function createStars() {
     });
   }
   
-  for (let i = 0; i < numStars; i++) {
+  for (let i = 0; i < config.starCount; i++) {
     // Every 4th node is a transition (rectangle)
     const isTransition = i % 4 === 0;
     
@@ -188,7 +357,7 @@ function createStars() {
       Math.random() * sizeMultiplier + 2;   // Larger for places
     
     // Determine if this star will be in a cluster (70% chance)
-    const inCluster = Math.random() < 0.7;
+    const inCluster = config.clusterEffect && Math.random() < 0.7;
     let x, y;
     
     if (inCluster) {
@@ -218,8 +387,8 @@ function createStars() {
       y: y,
       radius: baseRadius,
       baseRadius: baseRadius,
-      vx: (Math.random() * 50 - 25) * speedVariety,
-      vy: (Math.random() * 50 - 25) * speedVariety,
+      vx: (Math.random() * 50 - 25) * speedVariety * config.speedFactor,
+      vy: (Math.random() * 50 - 25) * speedVariety * config.speedFactor,
       isTransition: isTransition,
       // Add some personality to nodes for more varied animation
       pulseFactor: Math.random() * 0.4 + 0.2,
@@ -248,7 +417,7 @@ function updateVisualization() {
     .attr("fill", "url(#placeGradient)")
     .attr("stroke", "rgba(0, 95, 122, 0.4)")
     .attr("stroke-width", 0.5)
-    .style("filter", "url(#placeGlow)")
+    .style("filter", config.performanceMode ? null : "url(#placeGlow)")
     .merge(places) // Update existing
     .attr("r", d => d.radius)
     .attr("cx", d => d.x)
@@ -272,7 +441,7 @@ function updateVisualization() {
     .attr("fill", "url(#transitionGradient)")
     .attr("stroke", "rgba(81, 101, 64, 0.4)")
     .attr("stroke-width", 0.5)
-    .style("filter", "url(#transitionGlow)")
+    .style("filter", config.performanceMode ? null : "url(#transitionGlow)")
     .merge(transitions) // Update existing
     .attr("width", d => d.radius * 3)
     .attr("height", d => d.radius * 1.5)
@@ -286,27 +455,30 @@ function updateVisualization() {
   const connections = [];
   
   // Add mouse connections
-  stars.forEach((star, i) => {
-    const distToMouse = distance(mouse, star);
-    if (distToMouse < 150) {
-      connections.push({
-        id: `mouse-${i}`,
-        source: star,
-        target: mouse,
-        distance: distToMouse,
-        opacity: 1 - (distToMouse / 150) * 0.2,
-        color: "rgba(0, 95, 122, " + ((1 - (distToMouse / 150)) * 0.2) + ")",
-        width: 0.5 * (1 - distToMouse / 150)
-      });
-    }
-  });
+  if (config.mouseInteraction) {
+    stars.forEach((star, i) => {
+      const distToMouse = distance(mouse, star);
+      if (distToMouse < config.connectionDistance) {
+        connections.push({
+          id: `mouse-${i}`,
+          source: star,
+          target: mouse,
+          distance: distToMouse,
+          opacity: 1 - (distToMouse / config.connectionDistance) * 0.2,
+          color: "rgba(0, 95, 122, " + ((1 - (distToMouse / config.connectionDistance)) * 0.2) + ")",
+          width: 0.5 * (1 - distToMouse / config.connectionDistance),
+          isMouseConnection: true
+        });
+      }
+    });
+  }
   
   // Add node-to-node connections
   for (let i = 0; i < stars.length; i++) {
     for (let j = i + 1; j < stars.length; j++) {
       const dist = distance(stars[i], stars[j]);
-      if (dist < 150) {
-        const opacity = 1 - (dist / 150);
+      if (dist < config.connectionDistance) {
+        const opacity = 1 - (dist / config.connectionDistance);
         let color;
         
         // Different colors based on node types
@@ -454,12 +626,16 @@ function update() {
     const speedFactor = s.isTransition ? 0.7 : 1;
     
     // Update position
-    s.x += (s.vx / FPS) * speedFactor;
-    s.y += (s.vy / FPS) * speedFactor;
+    s.x += (s.vx / config.fps) * speedFactor;
+    s.y += (s.vy / config.fps) * speedFactor;
     
     // Enhanced pulsing radius effect with personalized parameters
-    s.radius = s.baseRadius + Math.sin(Date.now() * s.pulseSpeed + s.id) * 
-              (s.isTransition ? 0.3 * s.pulseFactor : 0.5 * s.pulseFactor);
+    if (config.pulsingEffect) {
+      s.radius = s.baseRadius + Math.sin(Date.now() * s.pulseSpeed + s.id) * 
+                (s.isTransition ? 0.3 * s.pulseFactor : 0.5 * s.pulseFactor);
+    } else {
+      s.radius = s.baseRadius;
+    }
     
     // Bounce off edges
     if (s.x < 0 || s.x > width) s.vx = -s.vx;
@@ -482,27 +658,31 @@ function onMouseMove(event) {
   if (evt) {
     mouse.x = evt.clientX || evt.pageX || 0;
     mouse.y = evt.clientY || evt.pageY || 0;
-    
-    // Uncomment for debugging
-    // console.log("Mouse position:", mouse.x, mouse.y);
   }
 }
 
 function setCanvas(status) {
   if (status) {
+    config.enabled = true;
+    saveConfig();
+    
     if (!drawing) {
       drawing = true;
+      svg.style("opacity", config.opacity);
+      createStars(); // Recreate stars if needed
       tick();
     }
   } else {
+    config.enabled = false;
+    saveConfig();
+    
     drawing = false;
-    // Clear by removing all elements
-    svg.selectAll("*").remove();
+    svg.style("opacity", 0);
   }
 }
 
 function tick() {
-  if (drawing) {
+  if (drawing && config.enabled) {
     update();
     updateVisualization();
     requestAnimationFrame(tick);
@@ -533,48 +713,62 @@ function resize() {
   }
 }
 
-// Add enhanced CSS for transitions and animations
-const style = document.createElement('style');
-style.textContent = `
-  svg.fade-out { opacity: 0; transition: opacity 0.3s ease-out; }
-  svg.fade-in { opacity: 1; transition: opacity 0.3s ease-in; }
-  
-  @keyframes pulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-  }
-  
-  .places circle {
-    animation: pulse 3s infinite ease-in-out;
-  }
-  
-  .transitions rect {
-    animation: pulse 4s infinite ease-in-out;
-  }
-  
-  .connections line {
-    transition: stroke 0.3s, stroke-width 0.3s;
-  }
-`;
-document.head.appendChild(style);
-
 // Handle window resize
 window.addEventListener('resize', () => {
   if (resizeTimer) clearTimeout(resizeTimer);
   resizeTimer = setTimeout(resize, 200);
 });
 
-let resizeTimer;
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   createCanvas("body");
 });
 
+// Expose configuration functions for external use (settings page)
+window.petriNetAnimation = {
+  // Update a specific setting
+  updateSetting: function(setting, value) {
+    updateConfig(setting, value);
+  },
+  
+  // Get current configuration
+  getConfig: function() {
+    return {...config};
+  },
+  
+  // Reset to default configuration
+  resetConfig: function() {
+    config = {...DEFAULT_CONFIG};
+    saveConfig();
+    if (svg) {
+      setCanvas(config.enabled);
+      createStars();
+    }
+    return {...config};
+  },
+  
+  // Toggle animation on/off
+  toggle: function() {
+    const newStatus = !config.enabled;
+    setCanvas(newStatus);
+    return newStatus;
+  },
+  
+  // Enable performance mode
+  enablePerformanceMode: function() {
+    updateConfig('performanceMode', true);
+    return true;
+  },
+  
+  // Set star count
+  setStarCount: function(count) {
+    updateConfig('starCount', parseInt(count));
+    return count;
+  }
+};
+
 // For compatibility with existing code
 function createStarsWithCount(count) {
-  numStars = count;
-  localStorage.setItem('bgStarCount', count);
-  createStars();
+  updateConfig('starCount', count);
+  return count;
 }

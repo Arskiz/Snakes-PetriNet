@@ -61,9 +61,9 @@
             </div>
             
             <div class="team-member">
-                <div class="avatar-placeholder"></div>
+                <img src="{{ static('assets/images/anant.jpg') }}" alt="Anant Sujatanagarjuna" class="avatar-image">
                 <div class="member-info">
-                    <h3>Professor [Name]</h3>
+                    <h3>M.Sc. Anant Sujatanagarjuna</h3>
                     <p>Project Supervisor</p>
                     <p class="member-desc">Provided academic guidance and requirements specification.</p>
                 </div>
@@ -117,7 +117,7 @@
         <div class="about-content">
             <p>For questions, feedback, or support regarding the Snakes CPN Viewer, please contact:</p>
             <div class="contact-info">
-                <p><strong>Email:</strong> contact@example.com</p>
+                <p><strong>Email:</strong> aronsarkioja7@gmail.com</p>
                 <p><strong>Department:</strong> Digital Technologies, TU Clausthal</p>
                 <p><strong>Website:</strong> <a href="https://www.tu-clausthal.de" target="_blank">www.tu-clausthal.de</a></p>
             </div>
@@ -130,6 +130,14 @@
 
 <!-- Right side of the header -->
 {% block rightHeaderContent %}
+<div class="Hoverable" id="HomeBtn" onclick="redirect(3)">
+    <h1 class="nonSelectable white conChild HeaderElementText">Settings</h1>
+    <img
+        src="{{ static('assets/icons/settings.png') }}"
+        class="conChild" height="25px" id="Settings-Icon"
+        style="filter: invert(100%);"
+        alt="home-icon-btn">
+</div>
 <div class="Hoverable" id="HomeBtn" onclick="redirect(2)">
     <h1 class="nonSelectable white conChild HeaderElementText">To Snakes CPN</h1>
     <img

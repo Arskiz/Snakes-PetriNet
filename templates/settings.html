@@ -13,6 +13,123 @@
 <div class="settings-container">
     <div class="settings-header">
         <h1>Settings</h1>
+        <p class="settings-description">Customize your experience with these settings. Changes are saved automatically.</p>
+    </div>
+    
+    <div class="settings-section">
+        <h2>Background Animation</h2>
+        <div class="setting-item">
+            <label for="animation-toggle">Enable Animation</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="animation-toggle" checked>
+                <span class="toggle-slider"></span>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <label for="performance-mode">Performance Mode</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="performance-mode">
+                <span class="toggle-slider"></span>
+            </div>
+            <div class="setting-description">Reduces visual effects for better performance on low-end devices</div>
+        </div>
+        
+        <div class="setting-item">
+            <label for="star-count">Node Count</label>
+            <div class="range-control">
+                <div class="range-value">
+                    <span id="star-count-value">50</span>
+                </div>
+                <div class="range-buttons">
+                    <button class="range-button" id="star-count-decrease">-</button>
+                    <button class="range-button" id="star-count-increase">+</button>
+                </div>
+            </div>
+            <div class="setting-description">Number of animated nodes (fewer nodes means better performance)</div>
+        </div>
+        
+        <div class="setting-item">
+            <label for="animation-speed">Animation Speed</label>
+            <div class="range-control">
+                <div class="range-value">
+                    <span id="animation-speed-value">1.0x</span>
+                </div>
+                <div class="range-buttons">
+                    <button class="range-button" id="speed-decrease">-</button>
+                    <button class="range-button" id="speed-increase">+</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <label for="animation-opacity">Animation Opacity</label>
+            <div class="range-control">
+                <div class="range-value">
+                    <span id="animation-opacity-value">100%</span>
+                </div>
+                <div class="range-buttons">
+                    <button class="range-button" id="opacity-decrease">-</button>
+                    <button class="range-button" id="opacity-increase">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <h2>Visual Effects</h2>
+        <div class="setting-group">
+            <div class="setting-item">
+                <label for="mouse-interaction">Mouse Interaction</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="mouse-interaction" checked>
+                    <span class="toggle-slider"></span>
+                </div>
+                <div class="setting-description">Draw connections to mouse cursor</div>
+            </div>
+            
+            <div class="setting-item">
+                <label for="pulsing-effect">Pulsing Effect</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="pulsing-effect" checked>
+                    <span class="toggle-slider"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="setting-group">
+            <div class="setting-item">
+                <label for="cluster-effect">Cluster Effect</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="cluster-effect">
+                    <span class="toggle-slider"></span>
+                </div>                  
+                <div class="setting-description">Group nodes into clusters for more interesting patterns</div>
+            </div>
+            
+            <div class="setting-item">
+                <label for="connection-distance">Connection Distance</label>
+                <div class="range-control">
+                    <div class="range-value">
+                        <span id="connection-distance-value">150px</span>
+                    </div>
+                    <div class="range-buttons">
+                        <button class="range-button" id="distance-decrease">-</button>
+                        <button class="range-button" id="distance-increase">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="settings-actions">
+        <button id="reset-settings" class="settings-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+            </svg>
+            Reset to Defaults
+        </button>
     </div>
 </div>
 {% endblock %}
@@ -28,7 +145,7 @@
         alt="home-icon-btn">
 </div>
 
-<div class="Hoverable" id="HomeBtn" onclick="redirect(2)">
+<div class="Hoverable" id="HomeBtn" onclick="redirect(1)">
     <h1 class="nonSelectable white conChild HeaderElementText">About</h1>
     <img
         src="{{ static('assets/icons/info.png') }}"
@@ -54,4 +171,65 @@ Copyright © DIGIT, Inc. 2025. All rights reserved.
 
 {% block canvas %}
 <script type="module" src="{{ static('assets/scripts/canvas.js') }}"></script>
+<script type="module" src="{{ static('assets/scripts/jq-compatibility.js') }}"></script>
+<script type="module" src="{{ static('assets/scripts/settings.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Add styles for toggle animation
+    $('<style>')
+        .text(`
+            .toggle-ball {
+                position: absolute !important;
+                height: 20px !important;
+                width: 20px !important;
+                left: 4px !important;
+                bottom: 4px !important;
+                background-color: white !important;
+                border-radius: 50% !important;
+                transition: left 0.3s ease !important;
+                z-index: 100 !important;
+                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .toggle-switch input:checked ~ .toggle-ball {
+                left: 30px !important;
+            }
+        `)
+        .appendTo('head');
+
+    // Function to fix toggle switches
+    function fixToggles() {
+        $('.toggle-switch').each(function() {
+            // Skip if already fixed
+            if ($(this).find('.toggle-ball').length) return;
+
+            // Create and add ball element
+            $('<span>')
+                .addClass('toggle-ball')
+                .appendTo($(this));
+
+            // Add click handler to toggle the checkbox
+            $(this).on('click', function(e) {
+                const checkbox = $(this).find('input[type="checkbox"]');
+                if (e.target !== checkbox[0]) {
+                    checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+                }
+            });
+
+            // Prevent label clicks from double-toggling
+            const checkboxId = $(this).find('input[type="checkbox"]').attr('id');
+            if (checkboxId) {
+                $(`label[for="${checkboxId}"]`).on('click', function(e) {
+                    e.preventDefault();
+                });
+            }
+        });
+    }
+
+    // Run fixes with delays to ensure all elements are loaded
+    fixToggles();
+    setTimeout(fixToggles, 500);
+    setTimeout(fixToggles, 1000);
+});
+</script>
 {% endblock %}

@@ -13,7 +13,6 @@
     max-width: 1200px;
     margin: 20px auto;
     padding: 0 20px;
-    color: #0a3541;
     margin-bottom: 90px;
 }
 
@@ -150,7 +149,7 @@ button {
 
 /* Data Tabs Section */
 .data-tabs-section {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: #394459;
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 30px;
@@ -230,7 +229,8 @@ text {
     width: 100%;
     overflow-x: auto;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #394459;
+   /*  border: 1px solid rgba(255, 255, 255, 0.5); */
 }
 
 .petri-table {
@@ -241,8 +241,8 @@ text {
 }
 
 .petri-table th {
-    background-color: rgba(0, 95, 122, 0.1);
-    color: #0a3541;
+    background-color: rgba(0, 117, 150, 0.215);
+    color: #ffffff !important;
     font-weight: 600;
     text-align: left;
     padding: 12px 15px;
@@ -252,11 +252,11 @@ text {
 .petri-table td {
     padding: 10px 15px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    color: #0a3541;
+    color: #ffffff !important;
 }
 
 .petri-table tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: #4a5872;
 }
 
 .petri-table tr:hover {
@@ -272,7 +272,7 @@ text {
 }
 
 .stat-card {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #394459;
     border-radius: 10px;
     padding: 20px;
     text-align: center;
@@ -287,14 +287,14 @@ text {
 
 .stat-value {
     font-size: 36px;
-    font-weight: 700;
-    color: #005f7a;
+    color: #eaeaea;
     margin-bottom: 5px;
+    
 }
 
 .stat-label {
     font-size: 14px;
-    color: #0a3541;
+    color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 1px;
 }

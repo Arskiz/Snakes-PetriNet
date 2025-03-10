@@ -48,18 +48,23 @@ th label {
 }
 
 .popup-header {
-    background: linear-gradient(90deg, rgba(0, 95, 122, 0.9) 0%, rgba(81, 101, 64, 0.9) 100%);
+    background: linear-gradient(90deg, #3c4960 0%, #445d88 100%);
     padding: 15px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
+.popupDialog{
+    border: none !important;
+}
+
 .popup-header h3 {
     color: white;
     margin: 0;
     font-family: var(--mercFont);
-    font-size: 18px;
+    font-size: 25px;
+    font-weight: 700;
 }
 
 .close-button {
@@ -77,13 +82,17 @@ th label {
 
 .popup-content {
     padding: 20px;
-    background-color: #0a3541;
+    background-color: #2D3748;
 }
 
 .popup-content p {
     margin-bottom: 20px;
     color: #0a3541;
     font-family: var(--mercFont);
+}
+
+.ui-input-text{
+    opacity: 0 !important;
 }
 
 .file-input-container {
@@ -104,8 +113,9 @@ label {
 
 .label {
     width: 12em;
-    background: linear-gradient(90deg, #005f7a 0%, #516540 100%);
+    background-color: #27303f;
     border-radius: 8px;
+    align-items: center;
     padding: 12px 25px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -483,7 +493,7 @@ html,
     /* background-color: rgba(219, 219, 219, 0.364); */
     background-color: #2D3748;
     height: 500px;
-    width: 500px;
+    width: 450px;
     justify-self: center;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3)
@@ -535,9 +545,9 @@ html,
 .mainUploadBTN {
     background: linear-gradient(to right, #00bbff, #0044ff);
     position: fixed;
-    bottom: 0%;
+    bottom: 1.5%;
     height: 80px;
-    width: 97%;
+    width: 95%;
 }
 
 .mainPageContent {

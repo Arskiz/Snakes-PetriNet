@@ -1,0 +1,655 @@
+/* Settings page styling - Dark theme (jQuery UI Compatible) */
+/* Reset jQuery UI styles for our specific elements */
+.settings-container input[type="checkbox"],
+.settings-container input[type="checkbox"].ui-checkbox {
+    opacity: 0 !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border: none !important;
+    background: none !important;
+}
+
+.settings-container input[type="range"],
+.settings-container input[type="range"].ui-slider,
+.settings-container .ui-slider {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    height: 6px !important;
+    border-radius: 6px !important;
+    background: #374056 !important;
+    outline: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.settings-container input[type="range"]::-webkit-slider-thumb,
+.settings-container input[type="range"].ui-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: #0087af !important;
+    cursor: pointer !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.settings-container input[type="range"]::-moz-range-thumb,
+.settings-container input[type="range"].ui-slider::-moz-range-thumb {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: #0087af !important;
+    cursor: pointer !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Override jQuery UI specific classes */
+.settings-container .ui-checkboxradio-label {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.settings-container .ui-checkboxradio-icon {
+    display: none !important;
+}
+
+/* Reset any button styling from jQuery UI */
+.settings-container .range-button.ui-button,
+.settings-container .settings-button.ui-button {
+    background-color: #374056 !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    font-weight: 500 !important;
+}
+
+.settings-container .range-button.ui-button:hover,
+.settings-container .settings-button.ui-button:hover {
+    background-color: #0087af !important;
+}
+
+/* Main styles below - kept the same but added !important to critical rules */
+.settings-container {
+    max-width: 900px;
+    margin: 30px auto;
+    background-color: #1e2130 !important;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+    color: #e9ecef !important;
+    margin-bottom: 100px;
+}
+
+/* Toggle switch styling - Consolidated version with higher specificity */
+.settings-container .toggle-switch {
+    position: relative !important;
+    display: inline-block !important;
+    width: 54px !important;
+    height: 28px !important;
+    cursor: pointer !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hide the input checkbox */
+.settings-container .toggle-switch input[type="checkbox"] {
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Style the toggle slider (background) */
+.settings-container .toggle-switch .toggle-slider {
+    position: absolute !important;
+    cursor: pointer !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: #374056 !important;
+    transition: background-color 0.3s !important;
+    border-radius: 28px !important;
+    z-index: 0 !important;
+}
+
+/* Style the toggle slider button/knob using ONLY pseudo-element */
+.settings-container .toggle-switch .toggle-slider:before {
+    position: absolute !important;
+    content: "" !important;
+    height: 20px !important;
+    width: 20px !important;
+    left: 4px !important;
+    bottom: 4px !important;
+    background-color: white !important;
+    transition: transform 0.3s !important;
+    border-radius: 50% !important;
+    z-index: 1 !important;
+}
+
+/* Style the checked state */
+.settings-container .toggle-switch input:checked + .toggle-slider {
+    background-color: #0087af !important;
+}
+
+/* Move the button when checked using transform instead of left */
+.settings-container .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(26px) !important;
+}
+
+/* Remove any other definitions for slider-button class */
+.settings-container .toggle-switch .toggle-slider .slider-button {
+    display: none !important;
+}
+
+/* Toggle switch styling with guaranteed animation */
+.settings-container .toggle-switch {
+    position: relative !important;
+    display: inline-block !important;
+    width: 54px !important;
+    height: 28px !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important; /* Ensure the ball is visible */
+}
+
+/* Hide the input checkbox */
+.settings-container .toggle-switch input[type="checkbox"] {
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Style the toggle slider (background) */
+.settings-container .toggle-switch .toggle-slider {
+    position: absolute !important;
+    cursor: pointer !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: #374056 !important;
+    transition: background-color 0.3s ease !important;
+    border-radius: 28px !important;
+    z-index: 1 !important;
+}
+
+/* Create a separate element for the ball - more reliable than :before */
+.settings-container .toggle-ball {
+    position: absolute !important;
+    height: 20px !important;
+    width: 20px !important;
+    left: 4px !important;
+    bottom: 4px !important;
+    background-color: white !important;
+    border-radius: 50% !important;
+    transition: left 0.3s ease !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+}
+
+/* Move the ball when checked */
+.settings-container .toggle-switch input:checked ~ .toggle-ball {
+    left: 30px !important;
+}
+
+/* Change background when checked */
+.settings-container .toggle-switch input:checked + .toggle-slider {
+    background-color: #0087af !important;
+}
+
+/* Add a slight shadow to the ball for depth */
+.settings-container .toggle-ball {
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+.settings-header {
+    margin-bottom: 35px;
+    border-bottom: 1px solid #2d3348;
+    padding-bottom: 15px;
+}
+
+.settings-header h1 {
+    margin: 0;
+    color: #ffffff !important;
+    font-size: 28px;
+    font-weight: 500;
+}
+
+.settings-description {
+    color: #a0a8b7;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.settings-section {
+    margin-bottom: 40px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #2d3348;
+}
+
+.settings-section h2 {
+    font-size: 20px;
+    color: #00a8d0 !important;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.setting-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .setting-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+.setting-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #252a3d !important;
+    transition: all 0.2s ease;
+}
+
+.setting-item:hover {
+    background-color: #2a304a !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.setting-item label {
+    justify-self: flex-start;
+    min-width: 200px;
+    font-weight: 500;
+    color: #ffffff !important;
+    margin-left: 20px;
+}
+
+.setting-description {
+    flex-basis: 100%;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #a0a8b7;
+}
+
+/* Toggle switch styling */
+.toggle-container {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.toggle-switch {
+    position: relative !important;
+    display: inline-block !important;
+    width: 54px !important;
+    height: 28px !important;
+    z-index: 1 !important;
+}
+
+.toggle-slider {
+    position: absolute !important;
+    cursor: pointer !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: #374056 !important;
+    transition: .3s !important;
+    border-radius: 28px !important;
+    z-index: 0 !important;
+}
+
+.toggle-slider:before {
+    position: absolute !important;
+    content: "" !important;
+    height: 20px !important;
+    width: 20px !important;
+    left: 4px !important;
+    bottom: 4px !important;
+    background-color: #e9ecef !important;
+    transition: .3s !important;
+    border-radius: 50% !important;
+}
+
+input:checked+.toggle-slider {
+    background-color: #0087af !important;
+}
+
+input:checked+.toggle-slider:before {
+    transform: translateX(26px) !important;
+    background-color: #ffffff !important;
+}
+
+input:focus+.toggle-slider {
+    box-shadow: 0 0 2px #0087af !important;
+}
+
+/* Range input styling */
+.range-control {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.range-container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 280px;
+}
+
+.range-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
+    width: 60px;
+    height: 32px;
+    font-weight: 500;
+    color: #ffffff !important;
+    background-color: #374056 !important;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.range-buttons {
+    display: flex;
+    margin-left: 10px;
+}
+
+.range-button {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 4px !important;
+    border: none !important;
+    background-color: #374056 !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    transition: all 0.2s !important;
+    min-width: unset !important;
+    padding: 0 !important;
+    margin: 0 0 0 5px !important;
+}
+
+.range-button:hover {
+    background-color: #0087af !important;
+}
+
+.range-button:first-child {
+    margin-right: 5px !important;
+}
+
+/* Button styling */
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+.settings-button {
+    background-color: #374056 !important;
+    border: none !important;
+    color: #ffffff !important;
+    padding: 10px 20px !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    transition: all 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.settings-button:hover {
+    background-color: #0087af !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.settings-button svg {
+    margin-right: 8px;
+}
+
+
+/* Hide jQuery UI's number inputs if they appear */
+.settings-container input[type="text"].ui-spinner-input {
+    display: none !important;
+}
+
+/* Fix for jQuery UI checkbox labels */
+.settings-container .ui-checkboxradio-label span.ui-checkboxradio-icon-space {
+    display: none !important;
+}
+
+/* Toast notification styling */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    background-color: #0087af;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    margin-top: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.toast-error {
+    background-color: #e74c3c;
+}
+
+/* Ripple animation */
+.ripple {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Custom toggle switch styling */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 54px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #374056;
+    transition: background-color 0.3s;
+    border-radius: 28px;
+}
+
+.toggle-slider:before,
+.toggle-slider .slider-button {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: left 0.3s;
+    border-radius: 50%;
+}
+
+input:checked+.toggle-slider {
+    background-color: #0087af;
+}
+
+input:checked+.toggle-slider:before,
+input:checked+.toggle-slider .slider-button {
+    left: 30px;
+}
+
+/* Range value styling */
+.range-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    height: 32px;
+    background-color: #374056;
+    border-radius: 16px;
+    color: #ffffff;
+    font-weight: 500;
+    margin-left: 15px;
+    padding: 0 12px;
+}
+
+/* Button styling */
+.range-button {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: none;
+    background-color: #374056;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 2px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.range-button:hover {
+    background-color: #0087af;
+}
+
+.range-button:active {
+    transform: scale(0.95);
+}
+
+.range-buttons {
+    display: flex;
+    margin-left: 10px;
+}
+
+/* Reset button styling */
+.settings-button {
+    background-color: #374056;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.settings-button:hover {
+    background-color: #0087af;
+}
+
+.settings-button:active {
+    transform: scale(0.98);
+}
+
+.settings-button svg {
+    margin-right: 8px;
+}
+
+/* Setting item styling */
+.setting-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 15px;
+    background-color: #252a3d;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: background-color 0.2s;
+}
+
+.setting-item:hover {
+    background-color: #2a304a;
+}
+
+.setting-item label {
+    flex: 1;
+    min-width: 200px;
+    color: #ffffff;
+    font-weight: 500;
+    margin-right: 15px;
+}
+
+.setting-description {
+    flex-basis: 100%;
+    font-size: 13px;
+    color: #a0a8b7;
+    margin-top: 10px;
+}
+
+/* For right-aligned controls */
+.control-group {
+    display: flex;
+    align-items: center;
+}
