@@ -5,7 +5,7 @@ This tool is a web-based visualization tool for Colored Petri Nets (CPN) built u
 ## Description
 This project provides an interactive web interface for creating, editing and visualizing Colored Petri Nets. It leverages the powerful SNAKES library for the underlying Petri net functionality and Django for the web framework.
 
-## Installation (WINDOWS)
+## Installation (Windows)
 
 1. Clone this repository
 2. Run `install-dependencies.bat` to install required Python packages:
