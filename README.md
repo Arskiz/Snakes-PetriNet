@@ -41,5 +41,6 @@ This project provides an interactive web interface for creating, editing and vis
 
 - Python 3.11+
 - Django
+- Jinja2
 - SNAKES library
 - Other dependencies listed in requirements.txt
