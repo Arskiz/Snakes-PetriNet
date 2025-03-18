@@ -1,0 +1,528 @@
+{
+  "places": [
+    {
+      "id": "p1",
+      "name": "p1",
+      "tokens": 5,
+      "top": 300,
+      "left": 600
+    },
+    {
+      "id": "p2",
+      "name": "p2",
+      "tokens": 3,
+      "top": 361,
+      "left": 590
+    },
+    {
+      "id": "p3",
+      "name": "p3",
+      "tokens": 10,
+      "top": 417,
+      "left": 561
+    },
+    {
+      "id": "p4",
+      "name": "p4",
+      "tokens": 5,
+      "top": 461,
+      "left": 517
+    },
+    {
+      "id": "p5",
+      "name": "p5",
+      "tokens": 7,
+      "top": 490,
+      "left": 461
+    },
+    {
+      "id": "p6",
+      "name": "p6",
+      "tokens": 4,
+      "top": 500,
+      "left": 400
+    },
+    {
+      "id": "p7",
+      "name": "p7",
+      "tokens": 5,
+      "top": 490,
+      "left": 339
+    },
+    {
+      "id": "p8",
+      "name": "p8",
+      "tokens": 4,
+      "top": 461,
+      "left": 283
+    },
+    {
+      "id": "p9",
+      "name": "p9",
+      "tokens": 0,
+      "top": 417,
+      "left": 239
+    },
+    {
+      "id": "p10",
+      "name": "p10",
+      "tokens": 5,
+      "top": 361,
+      "left": 210
+    },
+    {
+      "id": "p11",
+      "name": "p11",
+      "tokens": 4,
+      "top": 300,
+      "left": 200
+    },
+    {
+      "id": "p12",
+      "name": "p12",
+      "tokens": 5,
+      "top": 239,
+      "left": 210
+    },
+    {
+      "id": "p13",
+      "name": "p13",
+      "tokens": 10,
+      "top": 183,
+      "left": 239
+    },
+    {
+      "id": "p14",
+      "name": "p14",
+      "tokens": 5,
+      "top": 139,
+      "left": 283
+    },
+    {
+      "id": "p15",
+      "name": "p15",
+      "tokens": 5,
+      "top": 110,
+      "left": 339
+    },
+    {
+      "id": "p16",
+      "name": "p16",
+      "tokens": 5,
+      "top": 100,
+      "left": 400
+    },
+    {
+      "id": "p17",
+      "name": "p17",
+      "tokens": 4,
+      "top": 110,
+      "left": 461
+    },
+    {
+      "id": "p18",
+      "name": "p18",
+      "tokens": 3,
+      "top": 139,
+      "left": 517
+    },
+    {
+      "id": "p19",
+      "name": "p19",
+      "tokens": 0,
+      "top": 183,
+      "left": 561
+    },
+    {
+      "id": "p20",
+      "name": "p20",
+      "tokens": 4,
+      "top": 239,
+      "left": 590
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t1",
+      "name": "t1",
+      "from": [
+        "p1",
+        "p2"
+      ],
+      "to": [
+        "p3",
+        "p4"
+      ],
+      "top": 0.0,
+      "left": 400
+    },
+    {
+      "id": "t2",
+      "name": "t2",
+      "from": [
+        "p3",
+        "p4"
+      ],
+      "to": [
+        "p5",
+        "p6"
+      ],
+      "top": 60.0,
+      "left": 400
+    },
+    {
+      "id": "t3",
+      "name": "t3",
+      "from": [
+        "p5",
+        "p7"
+      ],
+      "to": [
+        "p8",
+        "p9"
+      ],
+      "top": 120.0,
+      "left": 400
+    },
+    {
+      "id": "t4",
+      "name": "t4",
+      "from": [
+        "p8",
+        "p10"
+      ],
+      "to": [
+        "p11",
+        "p12"
+      ],
+      "top": 180.0,
+      "left": 400
+    },
+    {
+      "id": "t5",
+      "name": "t5",
+      "from": [
+        "p11",
+        "p13"
+      ],
+      "to": [
+        "p14",
+        "p15"
+      ],
+      "top": 240.0,
+      "left": 400
+    },
+    {
+      "id": "t6",
+      "name": "t6",
+      "from": [
+        "p14",
+        "p16"
+      ],
+      "to": [
+        "p17",
+        "p18"
+      ],
+      "top": 300.0,
+      "left": 400
+    },
+    {
+      "id": "t7",
+      "name": "t7",
+      "from": [
+        "p17",
+        "p15"
+      ],
+      "to": [
+        "p19",
+        "p1"
+      ],
+      "top": 360.0,
+      "left": 400
+    },
+    {
+      "id": "t8",
+      "name": "t8",
+      "from": [
+        "p19",
+        "p18"
+      ],
+      "to": [
+        "p2",
+        "p20"
+      ],
+      "top": 420.0,
+      "left": 400
+    },
+    {
+      "id": "t9",
+      "name": "t9",
+      "from": [
+        "p20",
+        "p12"
+      ],
+      "to": [
+        "p6",
+        "p13"
+      ],
+      "top": 480.0,
+      "left": 400
+    },
+    {
+      "id": "t10",
+      "name": "t10",
+      "from": [
+        "p6",
+        "p16"
+      ],
+      "to": [
+        "p7",
+        "p10"
+      ],
+      "top": 540.0,
+      "left": 400
+    }
+  ],
+  "arcs": [
+    {
+      "source": "p1",
+      "target": "t1",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p2",
+      "target": "t1",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p3",
+      "target": "t2",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p4",
+      "target": "t2",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p5",
+      "target": "t3",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p7",
+      "target": "t3",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p8",
+      "target": "t4",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p10",
+      "target": "t4",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p11",
+      "target": "t5",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p13",
+      "target": "t5",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p14",
+      "target": "t6",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p16",
+      "target": "t6",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p17",
+      "target": "t7",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p15",
+      "target": "t7",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p19",
+      "target": "t8",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p18",
+      "target": "t8",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p20",
+      "target": "t9",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "p12",
+      "target": "t9",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p6",
+      "target": "t10",
+      "type": "input",
+      "weight": "3"
+    },
+    {
+      "source": "p16",
+      "target": "t10",
+      "type": "input",
+      "weight": "2"
+    },
+    {
+      "source": "t1",
+      "target": "p3",
+      "type": "output",
+      "weight": "4"
+    },
+    {
+      "source": "t1",
+      "target": "p4",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t2",
+      "target": "p5",
+      "type": "output",
+      "weight": "3"
+    },
+    {
+      "source": "t2",
+      "target": "p6",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t3",
+      "target": "p8",
+      "type": "output",
+      "weight": "4"
+    },
+    {
+      "source": "t3",
+      "target": "p9",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t4",
+      "target": "p11",
+      "type": "output",
+      "weight": "3"
+    },
+    {
+      "source": "t4",
+      "target": "p12",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t5",
+      "target": "p14",
+      "type": "output",
+      "weight": "4"
+    },
+    {
+      "source": "t5",
+      "target": "p15",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t6",
+      "target": "p17",
+      "type": "output",
+      "weight": "3"
+    },
+    {
+      "source": "t6",
+      "target": "p18",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t7",
+      "target": "p19",
+      "type": "output",
+      "weight": "4"
+    },
+    {
+      "source": "t7",
+      "target": "p1",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t8",
+      "target": "p2",
+      "type": "output",
+      "weight": "3"
+    },
+    {
+      "source": "t8",
+      "target": "p20",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t9",
+      "target": "p6",
+      "type": "output",
+      "weight": "4"
+    },
+    {
+      "source": "t9",
+      "target": "p13",
+      "type": "output",
+      "weight": "2"
+    },
+    {
+      "source": "t10",
+      "target": "p7",
+      "type": "output",
+      "weight": "3"
+    },
+    {
+      "source": "t10",
+      "target": "p10",
+      "type": "output",
+      "weight": "2"
+    }
+  ]
+}

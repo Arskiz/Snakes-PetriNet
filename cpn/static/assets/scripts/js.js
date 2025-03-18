@@ -7,9 +7,7 @@ const hamburgerButtonImage = $("#HamburgerBTNImg");
 let isHamburgerMenuOpened = false;
 
 // Initializes dropdown handlers on window load
-$(window).on("load", function () {
-
-
+$(window).on("load", function () { 
     // Clear nav items if their text is empty
     const navContent = $("#mySidenav .sidenav-content");
     const navItems = navContent.find("a");
@@ -95,4 +93,4 @@ function redirect(redirectId) {
     });
 }
 
-// Template created in 2024, Copyright © Aron Särkioja to DIGIT-RESEARCH. All rights reserved.
+// Template created in 2024, Copyright © Aron Särkioja to DIGIT-RESEARCH. All rights reserved to DIGIT-RESEARCH.

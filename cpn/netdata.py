@@ -24,6 +24,7 @@ def create_transition(transition_id, name, from_places, to_places, top, left):
         "left": left,
     }
 
+# Lists for Places and transitions are defined in this file
 places = []
 transitions = []
 

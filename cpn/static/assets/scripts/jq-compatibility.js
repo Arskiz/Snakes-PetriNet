@@ -1,20 +1,21 @@
 $(document).ready(function() {
-    // Find elements with jQuery UI classes and remove them
-    $('.ui-checkboxradio-label').removeClass('ui-checkboxradio-label');
-    $('.ui-checkboxradio-icon').removeClass('ui-checkboxradio-icon'); 
-    $('.ui-btn').removeClass('ui-btn');
-    $('.ui-btn-inherit').removeClass('ui-btn-inherit');
-    $('.ui-checkbox').removeClass('ui-checkbox');
-    $('.ui-slider').removeClass('ui-slider');
-    $('.ui-spinner-input').removeClass('ui-spinner-input');
-    $('.ui-checkboxradio-icon-space').removeClass('ui-checkboxradio-icon-space');
-    $('.ui-widget').removeClass('ui-widget');
-    $('.ui-widget-content').removeClass('ui-widget-content');
-    $('.ui-widget-header').removeClass('ui-widget-header');
-    $('.ui-state-default').removeClass('ui-state-default');
-    $('.ui-state-active').removeClass('ui-state-active');
-    $('.ui-state-hover').removeClass('ui-state-hover');
-    $('.ui-state-focus').removeClass('ui-state-focus');
-    $('.ui-corner-all').removeClass('ui-corner-all');
-    $('.ui-front').removeClass('ui-front');
+    // Identify elements with jQuery UI classes and remove them
+    const uiClasses = [
+        'ui-checkboxradio-label', 'ui-checkboxradio-icon', 'ui-btn', 
+        'ui-btn-inherit', 'ui-checkbox', 'ui-slider', 
+        'ui-spinner-input', 'ui-checkboxradio-icon-space', 'ui-widget', 
+        'ui-widget-content', 'ui-widget-header', 'ui-state-default', 
+        'ui-state-active', 'ui-state-hover', 'ui-state-focus', 
+        'ui-corner-all', 'ui-front', 'ui-helper-hidden-accessible', 
+        'ui-helper-hidden', 'ui-helper-reset', 'ui-helper-clearfix', 
+        'ui-helper-zfix', 'ui-priority-primary', 'ui-priority-secondary'
+    ];
+
+    uiClasses.forEach(uiClass => {
+        $(`.${uiClass}`).removeClass(uiClass);
+    });
 });
+
+// Script to remove jQuery UI classes from the page
+// This is necessary because the jQuery UI library keeps injecting its own styles into the page
+// This script will remove all jQuery UI classes from the page to prevent style conflicts

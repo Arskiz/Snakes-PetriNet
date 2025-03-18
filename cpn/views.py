@@ -12,7 +12,42 @@ import snakes
 from snakes.nets import Place, Transition, Value, Expression
 from .netdata import places, transitions, upload, extract_net_data
 
-UPLOAD_DIR = "media/uploads/"  # Määritä polku, minne tallennetaan
+UPLOAD_DIR = "media/uploads/"  # Defining the path for the uploaded files
+
+# Create your views here.
+jinja_env = engines["jinja2"]
+
+def home(request):
+    return render(request, "home.html")
+
+def about(request):
+    return render(request, "webInfo.html")
+
+def settings(request):
+    return render(request, "settings.html")
+
+def net_view(request):
+    return render(request, "home.html")
+
+import os
+import time
+import uuid  # For generating unique filenames
+
+from django.contrib import messages
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.template import engines
+from django.shortcuts import redirect
+from django.urls import reverse
+from snakes.nets import PetriNet
+import os, json
+
+import snakes
+from snakes.nets import Place, Transition, Value, Expression
+from .netdata import places, transitions, upload, extract_net_data
+
+UPLOAD_DIR = "media/uploads/"  # Defining the path for the uploaded files
 
 # Create your views here.
 jinja_env = engines["jinja2"]
@@ -91,8 +126,8 @@ def upload_file(request):
 
                 # Build the absolute URI
                 result['redirect_url'] = request.build_absolute_uri(base_url_with_query)
-                
                 return JsonResponse(result)
+                end_session(request)
             else:
                 return JsonResponse(result)
                 
@@ -116,8 +151,6 @@ def upload_file(request):
             'success': False,
             'error': 'Invalid request or no file provided'
         })
-
-
 
 def none(request):
     return render(request, "redirect.html")
@@ -181,4 +214,79 @@ def end_session(request):
         # Clear the session
         request.session.flush()
     
+    return redirect('home')  # Redirect to home page
+
+# Add a new endpoint for client-side cleanup
+@csrf_exempt
+def cleanup_session(request):
+    return end_session(request)
+
+def none(request):
+    return render(request, "redirect.html")
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+def display_petri_net(request, filename):
+    # Construct the full path to the JSON file
+    file_path = os.path.join('media', 'extracted_nets', filename)
+    
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        # Add an error message that will be displayed on the next page
+        messages.error(request, f"PetriNet file not found: {filename}")
+        
+        # Redirect to home or another appropriate page
+        return redirect('home')  # or 'cpn:index' depending on your URL configuration
+    
+    # Read the JSON data
+    with open(file_path, 'r') as f:
+        petri_net_data = json.load(f)
+    
+    # Render a template with the PetriNet data
+    return render(request, 'display_petri_net.html', {
+        'petri_net_data': petri_net_data,
+        'filename': filename
+    })
+    
+def delete_petri_net_data(request, filename):
+    # Construct the full path to the JSON file
+    file_path = os.path.join('media', 'extracted_nets', filename)
+    
+    # Check if the file exists
+    if os.path.exists(file_path):
+        try:
+            # Delete the file
+            os.remove(file_path)
+            messages.success(request, f"PetriNet data file '{filename}' has been deleted.")
+            none();
+        except Exception as e:
+            messages.error(request, f"Error deleting file: {str(e)}")
+    else:
+        messages.warning(request, f"File '{filename}' not found.")
+    
+    # Use an absolute URL instead of a named URL
+    from django.http import HttpResponseRedirect
+    return HttpResponseRedirect('/cpn')  # Redirect to root URL
+
+def end_session(request):
+    # Clean up files in this session
+    if 'petri_net_files' in request.session:
+        for file_path in request.session['petri_net_files']:
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                    print(f"Deleted session file {file_path}")
+                except Exception as e:
+                    print(f"Error deleting file {file_path}: {e}")
+        
+        # Clear the session data but keep the session active
+        request.session['petri_net_files'] = []
+        request.session.modified = True
+    
+    # If it's an AJAX request, return JSON response
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': 'Session ended successfully'})
+    
+    # Otherwise redirect
     return redirect('home')  # Redirect to home page

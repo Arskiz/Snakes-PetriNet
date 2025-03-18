@@ -155,99 +155,6 @@ Petri Net Analysis: {{ filename }}
 <script type="module">
     import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-    // Add simulation controls to the page
-    function addSimulationControls() {
-        // Create the simulation controls container
-        const container = d3.select('.canvas-container');
-        const controlsDiv = container.append('div')
-            .attr('class', 'simulation-controls')
-            .style('position', 'absolute')
-            .style('bottom', '10px')
-            .style('left', '10px')
-            .style('background-color', 'rgba(255, 255, 255, 0.8)')
-            .style('padding', '10px')
-            .style('border-radius', '5px')
-            .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.1)');
-        
-        // Add simulation buttons
-        controlsDiv.append('button')
-            .attr('id', 'start-sim')
-            .attr('class', 'sim-button')
-            .text('Start')
-            .on('click', startSimulation);
-        
-        controlsDiv.append('button')
-            .attr('id', 'stop-sim')
-            .attr('class', 'sim-button')
-            .text('Stop')
-            .style('margin-left', '5px')
-            .on('click', stopSimulation);
-        
-        controlsDiv.append('button')
-            .attr('id', 'step-sim')
-            .attr('class', 'sim-button')
-            .text('Step')
-            .style('margin-left', '5px')
-            .on('click', stepSimulation);
-        
-        controlsDiv.append('button')
-            .attr('id', 'reset-sim')
-            .attr('class', 'sim-button')
-            .text('Reset')
-            .style('margin-left', '5px')
-            .on('click', resetSimulation);
-        
-        // Add speed control slider
-        controlsDiv.append('span')
-            .text('Speed: ')
-            .style('margin-left', '10px');
-        
-        controlsDiv.append('input')
-            .attr('id', 'sim-speed')
-            .attr('type', 'range')
-            .attr('min', '100')
-            .attr('max', '2000')
-            .attr('value', '500')
-            .attr('step', '100')
-            .style('vertical-align', 'middle');
-        
-        // Add CSS for buttons
-        const style = document.createElement('style');
-        style.textContent = `
-            .sim-button {
-                padding: 5px 10px;
-                border: none;
-                border-radius: 3px;
-                background-color: #005F7A;
-                color: white;
-                cursor: pointer;
-                font-weight: bold;
-                transition: background-color 0.2s;
-            }
-            
-            .sim-button:hover {
-                background-color: #0A3541;
-            }
-            
-            .sim-button:disabled {
-                background-color: #cccccc;
-                cursor: not-allowed;
-            }
-            
-            .token-transition {
-                fill: #FF5722;
-                opacity: 0.8;
-            }
-            
-            .transition-active {
-                stroke: #FF5722;
-                stroke-width: 3px;
-                filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
     // Initialize simulation variables
     let simulationInterval = null;
     let initialPetriNetState = null;
@@ -289,141 +196,6 @@ Petri Net Analysis: {{ filename }}
                 });
             }
         });
-    }
-
-    // Start automatic simulation
-    function startSimulation() {
-        // Disable start and step buttons
-        d3.select('#start-sim').property('disabled', true);
-        d3.select('#step-sim').property('disabled', true);
-        
-        // Get simulation speed from slider
-        const speed = parseInt(d3.select('#sim-speed').property('value'));
-        
-        // Clear any existing interval
-        if (simulationInterval) {
-            clearInterval(simulationInterval);
-        }
-        
-        // Update nodes map to ensure we have the latest positions
-        updateNodesMap();
-        
-        // Set interval for automatic simulation steps
-        simulationInterval = setInterval(() => {
-            const fired = performSimulationStep();
-            
-            // If no transitions can fire, stop simulation
-            if (!fired) {
-                stopSimulation();
-                alert('Simulation stopped: No enabled transitions');
-            }
-        }, speed);
-    }
-
-    // Stop automatic simulation
-    function stopSimulation() {
-        // Clear the interval
-        if (simulationInterval) {
-            clearInterval(simulationInterval);
-            simulationInterval = null;
-        }
-        
-        // Re-enable start and step buttons
-        d3.select('#start-sim').property('disabled', false);
-        d3.select('#step-sim').property('disabled', false);
-    }
-
-    // Perform a single simulation step
-    function stepSimulation() {
-        // Update nodes map to ensure we have the latest positions
-        updateNodesMap();
-        performSimulationStep();
-    }
-
-    // Reset the simulation to initial state
-    function resetSimulation() {
-        // Stop any running simulation
-        stopSimulation();
-        
-        // Reset to initial state
-        currentPetriNetState = JSON.parse(JSON.stringify(initialPetriNetState));
-        
-        // Update visualization
-        updatePlacesWithTokens();
-    }
-
-    // Core function to perform one step of the Petri net simulation
-    function performSimulationStep() {
-        // Find all enabled transitions
-        const enabledTransitions = findEnabledTransitions();
-        
-        // If no transitions are enabled, return false
-        if (enabledTransitions.length === 0) {
-            return false;
-        }
-        
-        // Randomly select one of the enabled transitions
-        const randomIndex = Math.floor(Math.random() * enabledTransitions.length);
-        const selectedTransition = enabledTransitions[randomIndex];
-        
-        // Fire the selected transition
-        fireTransition(selectedTransition);
-        
-        return true;
-    }
-
-    // Find all enabled transitions in the current state
-    function findEnabledTransitions() {
-        const enabledTransitions = [];
-        
-        currentPetriNetState.transitions.forEach(transition => {
-            // Check if all input places have enough tokens
-            const isEnabled = transition.from.every(placeId => {
-                const place = currentPetriNetState.places.find(p => p.id === placeId);
-                return place && place.tokens > 0;
-            });
-            
-            if (isEnabled) {
-                enabledTransitions.push(transition);
-            }
-        });
-        
-        return enabledTransitions;
-    }
-
-    // Fire a transition, removing tokens from input places and adding to output places
-    function fireTransition(transition) {
-        // Highlight the transition
-        highlightTransition(transition.id);
-        
-        // 1. Prepare animation data
-        const inputAnimations = prepareInputAnimations(transition);
-        const outputAnimations = prepareOutputAnimations(transition);
-        
-        // 2. Update the state - remove tokens from input places
-        transition.from.forEach(placeId => {
-            const place = currentPetriNetState.places.find(p => p.id === placeId);
-            if (place) {
-                place.tokens--;
-            }
-        });
-        
-        // 3. Add tokens to output places
-        transition.to.forEach(placeId => {
-            const place = currentPetriNetState.places.find(p => p.id === placeId);
-            if (place) {
-                place.tokens++;
-            }
-        });
-        
-        // 4. Animate the token movement
-        animateTokenFlow(inputAnimations, outputAnimations, transition.id);
-        
-        // 5. Update visualization after a delay to match animation
-        setTimeout(() => {
-            updatePlacesWithTokens();
-            unhighlightTransition(transition.id);
-        }, 1000); // Match this with the total animation duration
     }
 
     // Prepare animations for tokens from input places to transition
@@ -551,24 +323,6 @@ Petri Net Analysis: {{ filename }}
                         outputTokens.remove();
                     });
             });
-    }
-
-    // Highlight a transition when it fires
-    function highlightTransition(transitionId) {
-        const transNode = nodesMap.get(transitionId);
-        if (transNode) {
-            d3.select(transNode.element).select('rect')
-                .classed('transition-active', true);
-        }
-    }
-
-    // Remove highlight from a transition
-    function unhighlightTransition(transitionId) {
-        const transNode = nodesMap.get(transitionId);
-        if (transNode) {
-            d3.select(transNode.element).select('rect')
-                .classed('transition-active', false);
-        }
     }
 
     // Update the visualization to show current token counts
@@ -1149,73 +903,93 @@ Petri Net Analysis: {{ filename }}
         // This function runs after your existing D3 visualization is set up
     function initPetriNetSimulation(petriNetData) {
         // Store the original data safely
-        const originalData = JSON.parse(JSON.stringify(petriNetData));
-        let currentData = JSON.parse(JSON.stringify(petriNetData));
-        let simulationInterval = null;
-        let isSimulationRunning = false;
+    const originalData = JSON.parse(JSON.stringify(petriNetData));
+    let currentData = JSON.parse(JSON.stringify(petriNetData));
+    let simulationInterval = null;
+    let isSimulationRunning = false; 
+    let simulationSpeed = 500;
+    
+    // Add control buttons
+    addSimulationControls();
+    
+    // CONTROL FUNCTIONS
+    function addSimulationControls() {
+        const container = d3.select('.canvas-container');
         
-        // Add control buttons
-        addSimulationControls();
+        // Remove existing controls if any
+        container.select('.simulation-controls').remove();
         
-        // CONTROL FUNCTIONS
-        function addSimulationControls() {
-            const container = d3.select('.canvas-container');
-            
-            // Remove existing controls if any
-            container.select('.simulation-controls').remove();
-            
-            const controlsDiv = container.append('div')
-                .attr('class', 'simulation-controls')
-                .style('position', 'absolute')
-                .style('bottom', '10px')
-                .style('left', '10px')
-                .style('padding', '12px')
-                .style('border-radius', '6px')
-                .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.2)');
-            
-            // Add simulation buttons
-            controlsDiv.append('button')
-                .attr('id', 'start-sim')
-                .attr('class', 'sim-button')
-                .text('Start')
-                .on('click', startSimulation);
-            
-            controlsDiv.append('button')
-                .attr('id', 'stop-sim')
-                .attr('class', 'sim-button')
-                .text('Stop')
-                .style('margin-left', '5px')
-                .on('click', stopSimulation);
-            
-            controlsDiv.append('button')
-                .attr('id', 'step-sim')
-                .attr('class', 'sim-button')
-                .text('Step')
-                .style('margin-left', '5px')
-                .on('click', stepSimulation);
-            
-            controlsDiv.append('button')
-                .attr('id', 'reset-sim')
-                .attr('class', 'sim-button')
-                .text('Reset')
-                .style('margin-left', '5px')
-                .on('click', resetSimulation);
-            
-            // Add speed control slider
-            controlsDiv.append('span')
-                .text('Speed: ')
-                .style('margin-left', '10px');
-            
+        const controlsDiv = container.append('div')
+            .attr('class', 'simulation-controls')
+            .style('position', 'absolute')
+            .style('bottom', '10px')
+            .style('left', '10px')
+            .style('padding', '12px')
+            .style('border-radius', '6px')
+            .style('box-shadow', '0 2px 5px rgba(0, 0, 0, 0.2)');
+        
+        // Add simulation buttons
+        controlsDiv.append('button')
+            .attr('id', 'start-sim')
+            .attr('class', 'sim-button')
+            .text('Start')
+            .on('click', startSimulation);
+        
+        controlsDiv.append('button')
+            .attr('id', 'stop-sim')
+            .attr('class', 'sim-button')
+            .text('Stop')
+            .style('margin-left', '5px')
+            .on('click', stopSimulation);
+        
+        controlsDiv.append('button')
+            .attr('id', 'step-sim')
+            .attr('class', 'sim-button')
+            .text('Step')
+            .style('margin-left', '5px')
+            .on('click', stepSimulation);
+        
+        controlsDiv.append('button')
+            .attr('id', 'reset-sim')
+            .attr('class', 'sim-button')
+            .text('Reset')
+            .style('margin-left', '5px')
+            .on('click', resetSimulation);
+        
+        // Add speed control slider
+        controlsDiv.append('span')
+            .text('Speed: ')
+            .style('margin-left', '10px');
+        
             controlsDiv.append('input')
-                .attr('id', 'sim-speed')
-                .attr('type', 'range')
-                .attr('min', '100')
-                .attr('max', '2000')
-                .attr('value', '500')
-                .attr('step', '100')
-                .style('vertical-align', 'middle');
+            .attr('id', 'sim-speed')
+            .attr('type', 'range')
+            .attr('min', '100')
+            .attr('max', '2000')
+            .attr('value', simulationSpeed)
+            .attr('step', '100')
+            .style('vertical-align', 'middle')
+            .on('input', function() {
+                // Update the speed variable immediately
+                simulationSpeed = 2100 - parseInt(this.value);
+                
+                // Only update interval if simulation is running
+                if (isSimulationRunning) {
+                    clearInterval(simulationInterval);
+                    
+                    // Create new interval with updated speed
+                    simulationInterval = setInterval(() => {
+                        const fired = performSimulationStep();
+                        if (!fired) {
+                            stopSimulation();
+                            alert('Simulation stopped: No enabled transitions');
+                        }
+                    }, simulationSpeed);
+                }
+            });
         }
         
+        // Then update the startSimulation function to use the simulationSpeed variable:
         function startSimulation() {
             if (isSimulationRunning) return;
             
@@ -1225,8 +999,10 @@ Petri Net Analysis: {{ filename }}
             d3.select('#start-sim').property('disabled', true);
             d3.select('#step-sim').property('disabled', true);
             
-            // Get simulation speed from slider
-            const speed = parseInt(d3.select('#sim-speed').property('value'));
+            const sliderValue = parseInt(d3.select('#sim-speed').property('value'));
+            simulationSpeed = 2100 - sliderValue;
+            // Use our speed variable instead of reading from the slider
+            // This ensures consistency between our stored value and what's used
             
             // Clear any existing interval
             if (simulationInterval) {
@@ -1242,9 +1018,9 @@ Petri Net Analysis: {{ filename }}
                     stopSimulation();
                     alert('Simulation stopped: No enabled transitions');
                 }
-            }, speed);
+            }, simulationSpeed);
         }
-        
+
         function stopSimulation() {
             // Clear the interval
             if (simulationInterval) {
@@ -1252,7 +1028,7 @@ Petri Net Analysis: {{ filename }}
                 simulationInterval = null;
             }
             
-            isSimulationRunning = false;
+            isSimulationRunning = false;  // Set flag to false when simulation stops
             
             // Re-enable start and step buttons
             d3.select('#start-sim').property('disabled', false);

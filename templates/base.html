@@ -35,7 +35,7 @@
         {% endblock %}
     </head>
 
-    <script>
+    <script> // TODO: Fix sessions not working properly
         // File input handling
         function updateFileName() {
             var mainInput = document.getElementById('mainFileInput');
@@ -50,30 +50,33 @@
                 fileName.innerText = "";
             }
         }
-
+    
         function uploadFile() {
+            console.log("uploadFile function called");
             var mainInput = document.getElementById('mainFileInput');
             var input = document.getElementById('fileInput');
             var fileToUpload;
-
+    
             if (mainInput && mainInput.files.length > 0) {
                 fileToUpload = mainInput.files[0];
             } else if (input && input.files.length > 0) {
                 fileToUpload = input.files[0];
             }
-
+    
             if (!fileToUpload) {
                 alert("No file selected!");
                 return;
             }
-
+    
             var formData = new FormData();
             formData.append('file', fileToUpload);
             var csrfToken = document.getElementById('csrf_token').value;
-
+            console.log("CSRF token:", csrfToken ? "Found" : "Not found");
+    
             // Show loading state
             document.getElementById('fileName').innerHTML = '<span class="loading-spinner"></span> Uploading...';
             
+            console.log("Starting file upload fetch request");
             fetch("{{ url('upload_file') }}", {
                 method: "POST",
                 body: formData,
@@ -81,25 +84,77 @@
                     "X-CSRFToken": csrfToken
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("Upload response received:", response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log("Upload data processed:", data);
                 if (data.success) {
                     document.getElementById('fileName').innerHTML = '<span class="success-icon">✓</span> Upload successful!';
+                    console.log("Will call handleUploadSuccess in 1 second with:", data);
+                    
+                    // Set a timeout to ensure we can see the success message
                     setTimeout(() => {
-                        $('#popupDialog').popup('close');
-                        if (data.redirect_url) {
-                            window.location.href = data.redirect_url;
+                        if (typeof $('#popupDialog').popup === 'function') {
+                            $('#popupDialog').popup('close');
+                        } else {
+                            console.warn("popup function not found on #popupDialog");
                         }
+                        
+                        console.log("Calling handleUploadSuccess now");
+                        handleUploadSuccess(data);
                     }, 1000);
                 } else {
+                    console.error("Upload not successful:", data);
                     document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> ' + (data.error || data.message || "Unknown error");
                 }
             })
             .catch(error => {
-                console.error("Error:", error);
+                console.error("Error during upload:", error);
                 document.getElementById('fileName').innerHTML = '<span class="error-icon">⚠️</span> Upload failed';
             });
         }
+    
+        // Clean session after upload - defined in global scope
+        window.handleUploadSuccess = function(data) {
+            console.log("handleUploadSuccess function called with:", data);
+            
+            if (data && data.redirect_url) {
+                console.log("Redirect URL found:", data.redirect_url);
+                console.log("About to send cleanup request");
+                
+                // First send cleanup request
+                fetch('/cleanup-session/', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    console.log("Cleanup response received:", response.status);
+                    return response.json();
+                })
+                .then(cleanupResult => {
+                    console.log("Cleanup completed:", cleanupResult);
+                    // Then redirect the user
+                    console.log("Redirecting to:", data.redirect_url);
+                    window.location.href = data.redirect_url;
+                })
+                .catch(error => {
+                    console.error("Cleanup error:", error);
+                    // Still redirect even if cleanup fails
+                    console.log("Cleanup failed, still redirecting to:", data.redirect_url);
+                    window.location.href = data.redirect_url;
+                });
+            } else {
+                console.warn("No redirect_url in data:", data);
+            }
+        };
+    
+        // Log on page load to confirm script is running
+        console.log("Upload script loaded successfully");
     </script>
 
     <body id="body">
@@ -118,6 +173,7 @@
                 </div>
             </div>
 
+            <!-- Center of the header, shows as a title- currently shown the text set below -->
             <h1 id="centerHeaderText" class="white Titles">Snakes CPN Viewer</h1>
 
             <!-- Right side of the header -->

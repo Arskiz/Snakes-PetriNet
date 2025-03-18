@@ -18,4 +18,5 @@ urlpatterns = [
         views.delete_petri_net_data,
         name="delete_petri_net_data",
     ),
+    path('cleanup-session/', views.cleanup_session, name='cleanup_session'),
 ]

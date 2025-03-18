@@ -1,6 +1,6 @@
 // Enhanced fix for buttons and toggle animations
 document.addEventListener('DOMContentLoaded', function () {
-    // Run fixes immediately and after short delays
+    // Run fixes immediately and after short delays. Repeats after 1000ms to ensure all elements are loaded. (Double checks)
     fixButtonsAndToggles();
     setTimeout(fixButtonsAndToggles, 300);
     setTimeout(fixToggleSwitches, 300);
