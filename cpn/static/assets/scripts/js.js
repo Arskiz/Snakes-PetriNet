@@ -67,7 +67,7 @@ function addClass(elementId, classToAdd) {
 // Redirects to a specified URL based on an ID
 function redirect(redirectId) {
     const urls = {
-        0: "https://www.digit-research.de/digitec-studieren",
+        0: "https://etce-lab.com/",
         1: "about",
         2: "snakes",
         3: "settings",
