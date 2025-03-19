@@ -30,10 +30,6 @@ ALLOWED_HOSTS = ['*']
 
 SECURE_HSTS_SECONDS = 300
 
-
-
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -161,9 +157,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
