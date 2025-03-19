@@ -33,7 +33,6 @@ This project provides an interactive web interface for creating, editing and vis
 ## Features
 
 - Interactive CPN visualization
-- Create and edit Petri nets through web interface
 - Support for colored tokens and transitions
 - Real-time simulation capabilities
 
