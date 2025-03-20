@@ -21,6 +21,7 @@ $(document).ready(function() {
     }
 });
 
+// Function to get param from the url-string
 function getQueryParam(param) {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
