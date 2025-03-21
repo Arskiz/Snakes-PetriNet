@@ -4,8 +4,15 @@
 {% block pageTitle %} Settings {% endblock %}
 
 {% block head %}
+<!-- jQuery and jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
 <!-- Add stylesheet for settings page -->
 <link rel="stylesheet" href="{{ static('assets/style-settings.css') }}"> 
+<script type="module" src="{{ static('assets/scripts/settings.js') }}"></script>
+<script type="module" src="{{ static('assets/scripts/jq-compatibility.js') }}"></script>
 {% endblock %}
 
 <!-- Main Content -->
@@ -19,18 +26,23 @@
     <div class="settings-section">
         <h2>Background Animation</h2>
         <div class="setting-item">
-            <label for="animation-toggle">Enable Animation</label>
+            <h3>Enable Animation</h3>
             <div class="toggle-switch">
                 <input type="checkbox" id="animation-toggle" checked>
-                <span class="toggle-slider"></span>
+                <span class="toggle-slider">
+                    <span class="slider-button"></span>
+                </span>
             </div>
+            <div class="setting-description">Enable or disable the background animation</div>
         </div>
         
         <div class="setting-item">
-            <label for="performance-mode">Performance Mode</label>
+            <h3>Performance Mode</h3>
             <div class="toggle-switch">
                 <input type="checkbox" id="performance-mode">
-                <span class="toggle-slider"></span>
+                <span class="toggle-slider">
+                    <span class="slider-button"></span>
+                </span>
             </div>
             <div class="setting-description">Reduces visual effects for better performance on low-end devices</div>
         </div>
@@ -42,8 +54,8 @@
                     <span id="star-count-value">50</span>
                 </div>
                 <div class="range-buttons">
-                    <button class="range-button" id="star-count-decrease">-</button>
-                    <button class="range-button" id="star-count-increase">+</button>
+                    <button class="range-button ui-button" id="star-count-decrease">-</button>
+                    <button class="range-button ui-button" id="star-count-increase">+</button>
                 </div>
             </div>
             <div class="setting-description">Number of animated nodes (fewer nodes means better performance)</div>
@@ -56,8 +68,8 @@
                     <span id="animation-speed-value">1.0x</span>
                 </div>
                 <div class="range-buttons">
-                    <button class="range-button" id="speed-decrease">-</button>
-                    <button class="range-button" id="speed-increase">+</button>
+                    <button class="range-button ui-button" id="speed-decrease">-</button>
+                    <button class="range-button ui-button" id="speed-increase">+</button>
                 </div>
             </div>
         </div>
@@ -69,8 +81,8 @@
                     <span id="animation-opacity-value">100%</span>
                 </div>
                 <div class="range-buttons">
-                    <button class="range-button" id="opacity-decrease">-</button>
-                    <button class="range-button" id="opacity-increase">+</button>
+                    <button class="range-button ui-button" id="opacity-decrease">-</button>
+                    <button class="range-button ui-button" id="opacity-increase">+</button>
                 </div>
             </div>
         </div>
@@ -80,29 +92,36 @@
         <h2>Visual Effects</h2>
         <div class="setting-group">
             <div class="setting-item">
-                <label for="mouse-interaction">Mouse Interaction</label>
+                <h3>Mouse Interaction</h3>
                 <div class="toggle-switch">
                     <input type="checkbox" id="mouse-interaction" checked>
-                    <span class="toggle-slider"></span>
+                    <span class="toggle-slider">
+                        <span class="slider-button"></span>
+                    </span>
                 </div>
                 <div class="setting-description">Draw connections to mouse cursor</div>
             </div>
             
             <div class="setting-item">
-                <label for="pulsing-effect">Pulsing Effect</label>
+                <h3>Pulsing Effect</h3>
                 <div class="toggle-switch">
                     <input type="checkbox" id="pulsing-effect" checked>
-                    <span class="toggle-slider"></span>
+                    <span class="toggle-slider">
+                        <span class="slider-button"></span>
+                    </span>
                 </div>
+                <div class="setting-description">Enable pulsing animation on nodes</div>
             </div>
         </div>
         
         <div class="setting-group">
             <div class="setting-item">
-                <label for="cluster-effect">Cluster Effect</label>
+                <h3>Cluster Effect</h3>
                 <div class="toggle-switch">
                     <input type="checkbox" id="cluster-effect">
-                    <span class="toggle-slider"></span>
+                    <span class="toggle-slider">
+                        <span class="slider-button"></span>
+                    </span>
                 </div>                  
                 <div class="setting-description">Group nodes into clusters for more interesting patterns</div>
             </div>
@@ -114,8 +133,8 @@
                         <span id="connection-distance-value">150px</span>
                     </div>
                     <div class="range-buttons">
-                        <button class="range-button" id="distance-decrease">-</button>
-                        <button class="range-button" id="distance-increase">+</button>
+                        <button class="range-button ui-button" id="distance-decrease">-</button>
+                        <button class="range-button ui-button" id="distance-increase">+</button>
                     </div>
                 </div>
             </div>
@@ -123,15 +142,34 @@
     </div>
     
     <div class="settings-actions">
-        <button id="reset-settings" class="settings-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-            </svg>
+        <button id="reset-settings" class="settings-button ui-button ui-corner-all">
+            <span class="ui-icon ui-icon-refresh"></span>
             Reset to Defaults
         </button>
     </div>
 </div>
+
+<!-- Script to initialize jQuery UI components -->
+<script>
+$(document).ready(function() {
+    // Convert buttons to jQuery UI buttons - but only specific ones
+    $('.range-button').button();
+    $('#reset-settings').button();
+    
+    // Make sure header buttons don't get jQuery UI styling
+    $('.Hoverable').removeClass('ui-button ui-corner-all ui-widget');
+    
+    // Prevent future application of jQuery UI classes to header buttons
+    const originalButtonMethod = $.fn.button;
+    $.fn.button = function() {
+        // Only apply the button method to elements that are not .Hoverable
+        if (this.hasClass('Hoverable')) {
+            return this;
+        }
+        return originalButtonMethod.apply(this, arguments);
+    };
+});
+</script>
 {% endblock %}
 
 <!-- Right side of the header -->
@@ -171,65 +209,4 @@ Copyright © DIGIT, Inc. 2025. All rights reserved.
 
 {% block canvas %}
 <script type="module" src="{{ static('assets/scripts/canvas.js') }}"></script>
-<script type="module" src="{{ static('assets/scripts/jq-compatibility.js') }}"></script>
-<script type="module" src="{{ static('assets/scripts/settings.js') }}"></script>
-<script>
-$(document).ready(function() {
-    // Add styles for toggle animation
-    $('<style>')
-        .text(`
-            .toggle-ball {
-                position: absolute !important;
-                height: 20px !important;
-                width: 20px !important;
-                left: 4px !important;
-                bottom: 4px !important;
-                background-color: white !important;
-                border-radius: 50% !important;
-                transition: left 0.3s ease !important;
-                z-index: 100 !important;
-                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2) !important;
-            }
-
-            .toggle-switch input:checked ~ .toggle-ball {
-                left: 30px !important;
-            }
-        `)
-        .appendTo('head');
-
-    // Function to fix toggle switches
-    function fixToggles() {
-        $('.toggle-switch').each(function() {
-            // Skip if already fixed
-            if ($(this).find('.toggle-ball').length) return;
-
-            // Create and add ball element
-            $('<span>')
-                .addClass('toggle-ball')
-                .appendTo($(this));
-
-            // Add click handler to toggle the checkbox
-            $(this).on('click', function(e) {
-                const checkbox = $(this).find('input[type="checkbox"]');
-                if (e.target !== checkbox[0]) {
-                    checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
-                }
-            });
-
-            // Prevent label clicks from double-toggling
-            const checkboxId = $(this).find('input[type="checkbox"]').attr('id');
-            if (checkboxId) {
-                $(`label[for="${checkboxId}"]`).on('click', function(e) {
-                    e.preventDefault();
-                });
-            }
-        });
-    }
-
-    // Run fixes with delays to ensure all elements are loaded
-    fixToggles();
-    setTimeout(fixToggles, 500);
-    setTimeout(fixToggles, 1000);
-});
-</script>
 {% endblock %}

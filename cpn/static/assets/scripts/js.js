@@ -85,7 +85,7 @@ function redirect(redirectId) {
 
     Object.values(headerElements).forEach(el => animateElement(el, "smoothToTop", 0.5));
     
-    let animationType = "growOut"; 
+    let animationType = "smoothOpacityOut"; 
 
     animateElement(document.getElementById("archDiv"), animationType, 1);
     animateElement(headerElements.body, "smoothOpacityOut", 0.9, () => {
