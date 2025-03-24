@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "cpn",
+    "cpn", # Our application - Petrinet visualization
 ]
 
 MIDDLEWARE = [
@@ -68,21 +68,21 @@ MIDDLEWARE = [
 ALLOWED_HOSTS = ['*']
 
 # Session settings
-SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
+SESSION_COOKIE_AGE = 3600  # 1 Hour
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Close session when browser closes
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],  # 🟢 NYT Jinja2 etsii templates-kansiosta!
-        "APP_DIRS": False,  # 🔴 Jinja2 EI KÄYTÄ APP_DIRS, joten laitetaan False
+        "DIRS": [os.path.join(BASE_DIR, "templates")],  # Jinja2 Looks templates from templates folder
+        "APP_DIRS": False,  # Jinja2 doesn't use APP_DIRS so; False.
         "OPTIONS": {
             "environment": "cpn.jinja2.environment",
         },
     },
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],  # 🟢 Django etsii samasta paikasta!
+        "DIRS": [os.path.join(BASE_DIR, "templates")],  # Django looks from the same location
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

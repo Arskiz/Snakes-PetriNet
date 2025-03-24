@@ -1,23 +1,10 @@
-/* Ensure header buttons don't get jQuery UI styling */
-.Hoverable {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: inherit !important;
-}
+/*
+ * SETTINGS PAGE STYLING
+ * Dark theme with jQuery UI components
+ */
 
-.Hoverable.ui-button {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: inherit !important;
-}
-
-.HeaderElementText {
-    color: inherit !important;
-}/* Settings page styling with jQuery UI - Dark theme */
-
-/* Override jQuery UI theme with dark theme */
+/* ===== JQUERY UI OVERRIDES ===== */
+/* Dark theme for jQuery UI components */
 .ui-widget-content {
     background: #1e2130;
     color: #e9ecef;
@@ -69,7 +56,31 @@
     transform: scale(0.95);
 }
 
-/* Main container styles */
+/* Ensure header buttons don't get jQuery UI styling */
+.Hoverable,
+.Hoverable.ui-button {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: inherit !important;
+}
+
+.HeaderElementText {
+    color: inherit !important;
+}
+
+/* jQuery UI tooltips */
+.ui-tooltip {
+    background: #0087af;
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+/* ===== LAYOUT & CONTAINERS ===== */
 .settings-container {
     max-width: 900px;
     margin: 30px auto 100px;
@@ -80,7 +91,14 @@
     color: #e9ecef;
 }
 
-/* Headers and sections */
+.setting-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* ===== HEADERS & SECTIONS ===== */
 .settings-header {
     margin-bottom: 35px;
     border-bottom: 1px solid #2d3348;
@@ -113,21 +131,7 @@
     font-weight: 500;
 }
 
-/* Setting item grid */
-.setting-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-@media (max-width: 768px) {
-    .setting-group {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Individual setting items */
+/* ===== SETTING ITEMS ===== */
 .setting-item {
     width: 100%;
     display: flex;
@@ -166,7 +170,7 @@
     color: #a0a8b7;
 }
 
-/* Toggle Switch - jQuery UI Compatible */
+/* ===== TOGGLE SWITCHES ===== */
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -212,7 +216,7 @@
     left: 30px;
 }
 
-/* Range input controls */
+/* ===== RANGE CONTROLS ===== */
 .range-control {
     display: flex;
     align-items: center;
@@ -240,7 +244,6 @@
     margin-left: 10px;
 }
 
-/* Style jQuery UI buttons */
 .range-button.ui-button {
     width: 28px;
     height: 28px;
@@ -253,7 +256,7 @@
     justify-content: center;
 }
 
-/* Reset button styling */
+/* ===== ACTION BUTTONS ===== */
 .settings-actions {
     display: flex;
     justify-content: flex-end;
@@ -271,13 +274,9 @@
     margin-right: 8px;
 }
 
-/* jQuery UI tooltips */
-.ui-tooltip {
-    background: #0087af;
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 8px 12px;
-    font-size: 14px;
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .setting-group {
+        grid-template-columns: 1fr;
+    }
 }

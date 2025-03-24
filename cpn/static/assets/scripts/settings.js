@@ -244,6 +244,7 @@ function updateUIFromSettings(settings) {
     });
 }
 
+// Loads the info for the settings page elements
 function getSettingInfo(labelText) {
     if (labelText.includes('node count')) {
         return {
@@ -281,6 +282,7 @@ function getSettingInfo(labelText) {
     return null;
 }
 
+// Returns formatted version of the given parameter
 function formatValue(value, settingKey) {
     switch (settingKey) {
         case 'starCount':
@@ -296,6 +298,7 @@ function formatValue(value, settingKey) {
     }
 }
 
+// Returns parsed values upon called with approppriate parameters
 function parseDisplayValue(displayValue, settingKey) {
     switch (settingKey) {
         case 'starCount':

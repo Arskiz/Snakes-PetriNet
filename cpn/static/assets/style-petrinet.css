@@ -1,3 +1,9 @@
+/*
+ * PETRI NET DISPLAY STYLES
+ * Organized into logical sections for improved readability
+ */
+
+/* ===== VARIABLES ===== */
 :root {
     --dark: rgb(48, 48, 48);
     --mercRed: #85262b;
@@ -7,15 +13,102 @@
     --mercFont: "Nunito";
 }
 
-/* Petri Net Display Styles */
-
+/* ===== LAYOUT & CONTAINERS ===== */
 .petri-container {
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 20px auto 90px;
     padding: 0 20px;
-    margin-bottom: 90px;
 }
 
+.canvas-fullscreen,
+.canvas-windowed {
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 30px inset rgba(10, 53, 65, 0.3) !important;
+    border: 1px solid rgba(10, 53, 65, 0.2);
+    overflow: hidden;
+    background-color: #394459;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    transition: width, height, position, border-radius 0.2s;
+    z-index: 0;
+}
+
+.canvas-title-span {
+    align-items: center;
+    justify-content: space-between;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin-bottom: 5px;
+}
+
+.canvas-fullscreen {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.canvas-windowed {
+    width: 100%;
+    height: 1000px;
+    border-radius: 8px;
+    position: block;
+}
+
+#c-button{
+    width: 150px;
+    border: none;
+    background: linear-gradient(120deg, rgba(0, 135, 72, 0.8), rgba(0, 159, 143, 0.4));
+    color: white;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid #394459;
+    box-shadow: 0 0 10px inset rgba(0, 0, 0, 0.4) !important;
+    font-family: Nunito;
+    transition: all 0.3s;
+}
+
+#c-button:hover{
+    transform: translateY(-5px);
+    background: linear-gradient(120deg, rgba(0, 159, 143, 0.4), rgba(0, 135, 72, 0.8));
+}
+
+#c-title{
+    margin:0;
+    padding: 0;
+}
+
+#f-button {
+    position: fixed;
+    top: 5px;
+    left: 10px;
+    z-index: 1;
+    height: 50px;
+    width: auto;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(45deg, #ff0000, #cc0000, #ff3333);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+#f-button:hover {
+    background: linear-gradient(45deg, #cc0000, #ff3333, #ff0000);
+    box-shadow: 0 8px 20px rgba(255, 0, 0, 0.7);
+    transform: translateY(-2px);
+}
+
+#f-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+}
+
+/* ===== HEADER STYLES ===== */
 .petri-header {
     width: 100%;
     display: flex;
@@ -41,12 +134,11 @@
     text-decoration: none;
     position: relative;
     letter-spacing: 0.8px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     padding-bottom: 8px;
     transition: all 0.3s ease;
     text-align: center;
     user-select: none;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .petri-header h1::after {
@@ -66,10 +158,6 @@
     width: 70%;
 }
 
-text {
-    color: whitesmoke !important;
-}
-
 .petri-filename {
     font-family: var(--mercFont);
     font-size: 18px;
@@ -83,10 +171,9 @@ text {
         0 4px 15px rgba(0, 0, 0, 0.05),
         inset 0 0 15px rgba(255, 255, 255, 0.5);
     margin: 0 !important;
-    text-align: right;
+    text-align: center;
     transition: all 0.3s ease;
     cursor: pointer;
-    text-align: center;
 }
 
 .petri-filename:hover {
@@ -94,26 +181,17 @@ text {
     box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.08),
         inset 0 0 20px rgba(255, 255, 255, 0.6);
-
     background: linear-gradient(65deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5));
-
 }
 
+/* ===== SECTION STYLES ===== */
 .data-tabs-section,
 .visualization-section {
     background-color: #2D3748 !important;
     border: 1px solid #394459 !important;
 }
 
-.petri-filename,
-.petri-header h1,
-button {
-    text-shadow: none !important;
-}
-
-/* Visualization Section */
 .visualization-section {
-    /* background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)); */
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
@@ -133,21 +211,6 @@ button {
     padding-bottom: 10px;
 }
 
-.canvas-container {
-    width: 100%;
-    backdrop-filter: blur(8px);
-    height: 1000px;
-    border-radius: 8px;
-    box-shadow: 0 0 30px inset rgba(10, 53, 65, 0.3) !important;
-    border: 1px solid rgba(10, 53, 65, 0.2);
-    overflow: hidden;
-    /* background-color: rgba(255, 255, 255, 0.5); */
-    background-color: #394459;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-
-/* Data Tabs Section */
 .data-tabs-section {
     background-color: #394459;
     border-radius: 12px;
@@ -157,15 +220,11 @@ button {
     border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
+/* ===== TAB NAVIGATION ===== */
 .tabs {
     display: flex;
     background: linear-gradient(90deg, rgba(0, 95, 122, 0.7) 0%, rgba(81, 101, 64, 0.7) 100%);
     padding: 0;
-}
-
-text {
-    text-shadow: none !important;
-    color: whitesmoke !important;
 }
 
 .tab-button {
@@ -214,23 +273,12 @@ text {
     animation: fadeIn 0.5s ease;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-/* Table Styles */
+/* ===== TABLE STYLES ===== */
 .table-container {
     width: 100%;
     overflow-x: auto;
     border-radius: 8px;
     background-color: #394459;
-   /*  border: 1px solid rgba(255, 255, 255, 0.5); */
 }
 
 .petri-table {
@@ -263,7 +311,7 @@ text {
     background-color: rgba(0, 95, 122, 0.05);
 }
 
-/* Statistics Tab */
+/* ===== STATISTICS STYLES ===== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -289,7 +337,6 @@ text {
     font-size: 36px;
     color: #eaeaea;
     margin-bottom: 5px;
-    
 }
 
 .stat-label {
@@ -299,7 +346,7 @@ text {
     letter-spacing: 1px;
 }
 
-/* Actions Section */
+/* ===== BUTTON & ACTION STYLES ===== */
 .actions-section {
     display: flex;
     align-items: center;
@@ -351,8 +398,7 @@ text {
     font-size: 18px;
 }
 
-/* Add this to your style-petrinet.css file or include within a <style> tag in the head */
-
+/* ===== SIMULATION CONTROLS ===== */
 .simulation-controls {
     position: absolute;
     bottom: 15px;
@@ -394,18 +440,6 @@ text {
     transform: none;
 }
 
-.token-transition {
-    fill: #FF5722;
-    opacity: 0.8;
-    filter: drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5));
-}
-
-.transition-active {
-    stroke: #FF5722;
-    stroke-width: 3px;
-    filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
-}
-
 #sim-speed {
     width: 120px;
     margin: 0 5px;
@@ -418,7 +452,41 @@ text {
     margin-left: 10px;
 }
 
-/* Add a pulse animation for firing transitions */
+/* ===== VISUALIZATION ELEMENTS ===== */
+.token-transition {
+    fill: #FF5722;
+    opacity: 0.8;
+    filter: drop-shadow(0px 0px 3px rgba(255, 87, 34, 0.5));
+}
+
+.transition-active {
+    stroke: #FF5722;
+    stroke-width: 3px;
+    filter: drop-shadow(0px 0px 5px rgba(255, 87, 34, 0.7));
+}
+
+text {
+    color: whitesmoke !important;
+    text-shadow: none !important;
+}
+
+.petri-filename,
+.petri-header h1,
+button {
+    text-shadow: none !important;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 @keyframes pulse {
     0% {
         opacity: 1;
@@ -437,7 +505,7 @@ text {
     animation: pulse 0.5s ease-in-out;
 }
 
-/* Responsive Adjustments */
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     .petri-container {
         padding: 0 10px;
@@ -459,7 +527,7 @@ text {
         font-size: 14px;
     }
 
-    .canvas-container {
+    .canvas-windowed {
         height: 400px;
     }
 

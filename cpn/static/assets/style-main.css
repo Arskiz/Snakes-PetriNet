@@ -1,3 +1,9 @@
+/*
+ * MAIN CSS STYLES
+ * Organized by variables, layout, components, and responsive design
+ */
+
+/* ===== VARIABLES ===== */
 :root {
     --dark: rgb(48, 48, 48);
     --mercRed: #85262b;
@@ -8,11 +14,13 @@
     --mercWhite: rgba(255, 255, 255, 0.7);
     --mercFont: "Nunito";
 }
+
+/* ===== BASE STYLES ===== */
 html {
     transition: all 0.3s;
 }
 
-
+/* ===== LAYOUT CONTAINERS ===== */
 #archDiv {
     justify-content: center;
     align-items: center;
@@ -22,11 +30,10 @@ html {
     padding-left: 10px;
     padding-right: 10px;
     height: 100%;
-
     transition: all 0.3s;
 }
 
-#cDiv{
+#cDiv {
     justify-content: center;
     align-items: center;
     margin-top: 40px;
@@ -42,20 +49,10 @@ html {
     transition: all 0.3s;
 }
 
+/* ===== FLEX UTILITIES ===== */
 .flexColumn {
     display: flex;
     flex-direction: column;
-}
-
-#fC1 {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    /* Removed align items center because of issues */
-    justify-content: center; /* Default center alignment */
-    gap: 10px;
-    margin-right: 10px;
-    margin-left: 10px;
 }
 
 .flexRow {
@@ -72,38 +69,26 @@ html {
     flex-direction: row;
 }
 
-
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
+#fC1 {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    /* Removed align items center because of issues */
+    justify-content: center; /* Default center alignment */
+    gap: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
 }
 
-@keyframes fromRight {
-    0% {
-        transform: translateX(150px);
-    }
-
-    100% {
-        transform: translateX(0px);
-    }
+#fR1 {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
 }
 
-@keyframes fromUnder {
-    0% {
-        transform: translateY(150px);
-    }
-
-    100% {
-        transform: translateY(0px);
-    }
-}
-
+/* ===== COMPONENTS ===== */
 .itemButton {
     border: 4px solid black;
     border-radius: 5px;
@@ -116,42 +101,62 @@ html {
     background-color: rgba(255, 255, 255, 0.671);
 }
 
-#fR1 {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-    justify-content: center;
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
-@media (max-width: 569px) {
-   .closeButton {
-        width: 100%;
-        text-align: center;
+@keyframes fromRight {
+    0% {
+        transform: translateX(150px);
     }
-
-    #detailsWindowTitle{
-        text-align: center;
+    100% {
+        transform: translateX(0px);
     }
-
 }
 
-@media (max-width: 790px) {
-    #itemPreviewImage {
-        width: 500px;
+@keyframes fromUnder {
+    0% {
+        transform: translateY(150px);
     }
-
+    100% {
+        transform: translateY(0px);
+    }
 }
 
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1400px) {
     #centerHeaderText {
         display: none;
     }
 }
 
-@media (max-width: 650px){
-    #accountWindow{
+@media (max-width: 790px) {
+    #itemPreviewImage {
+        width: 500px;
+    }
+}
+
+@media (max-width: 650px) {
+    #accountWindow {
         right: 170px;
     }
 }
+
+@media (max-width: 569px) {
+    .closeButton {
+        width: 100%;
+        text-align: center;
+    }
+
+    #detailsWindowTitle {
+        text-align: center;
+    }
+}
+
 /* Copyright© Aron Särkioja to DIGIT, Inc. 2025. All rights reserved. */

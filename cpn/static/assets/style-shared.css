@@ -632,6 +632,7 @@ footer {
     background-color: #111827;
     z-index: 2;
     width: 100%;
+    transition: all 1s;
 }
 
 .lineLonger {
@@ -1321,15 +1322,18 @@ body {
     left: 0%;
     right: 0%;
     bottom: 70px;
+    box-shadow: inset 0px 0px 15px #172135;
     /* I suggest you use global variables for this */
-    background: linear-gradient(90deg, rgba(81, 101, 64, 0.7) 0%, rgba(0, 95, 122, 0.8) 100%);
+    background: linear-gradient(-90deg, #172135 0%, #222f48 100%);
 }
 
+/* The footer for the sidenav */
 #footerNav {
     position: absolute;
     bottom: 0;
 }
 
+/* The header for the sidenav */
 #headerNav {
     position: absolute;
     top: 0;
@@ -1343,8 +1347,9 @@ body {
     left: 0;
     right: 0;
     height: 70px;
+    
     /* I suggest you use global variables for this */
-    background: linear-gradient(-90deg, rgba(81, 101, 64, 0.95) 0%, rgba(0, 95, 122, 0.95) 100%);
+    background: linear-gradient(-90deg, #222f48 0%, #172135 100%);
 }
 
 /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */

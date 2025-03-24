@@ -16,11 +16,17 @@ Petri Net Analysis: {{ filename }}
     </div>
     
     <!-- Visualization Section -->
-    <div class="visualization-section">
-        <h2>Visual Representation</h2>
-        <div class="canvas-container"></div>
+    <div id="c-holder" class="visualization-section">
+        <div class="canvas-title-span">
+            <h3 id="c-title">Visual Representation</h3>
+            
+            <button id="c-button">Fullscreen</button>
+        </div> 
+        <div id="v-section" class="canvas-windowed"></div> 
     </div>
     
+    <button id="f-button" hidden>Back to windowed mode</button>
+
     <!-- Data Tabs Section -->
     <div class="data-tabs-section">
         <div class="tabs">
@@ -38,7 +44,6 @@ Petri Net Analysis: {{ filename }}
                             <th>ID</th>
                             <th>Name</th>
                             <th>Tokens</th>
-                            <th>Position</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,7 +52,6 @@ Petri Net Analysis: {{ filename }}
                             <td>{{ place.id }}</td>
                             <td>{{ place.name }}</td>
                             <td>{{ place.tokens }}</td>
-                            <td>({{ place.top }}, {{ place.left }})</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -65,7 +69,6 @@ Petri Net Analysis: {{ filename }}
                             <th>Name</th>
                             <th>From Places</th>
                             <th>To Places</th>
-                            <th>Position</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,7 +78,6 @@ Petri Net Analysis: {{ filename }}
                             <td>{{ transition.name }}</td>
                             <td>{{ transition.from|join(", ") }}</td>
                             <td>{{ transition.to|join(", ") }}</td>
-                            <td>({{ transition.top }}, {{ transition.left }})</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -95,18 +97,18 @@ Petri Net Analysis: {{ filename }}
                     <div class="stat-label">Transitions</div>
                 </div>
                 <div class="stat-card">
-                    {% set total_tokens = 0 %}
-                    {% for place in petri_net_data.places %}
-                        {% set total_tokens = total_tokens + place.tokens|int %}
-                    {% endfor %}
+                    {% set total_tokens = 0 %} <!-- This part is not fetching the tokens correctly-->
+                    {% for place in petri_net_data.places %} <!-- This part is not fetching the tokens correctly-->
+                        {% set total_tokens = total_tokens + place.tokens|int %} <!-- This part is not fetching the tokens correctly-->
+                    {% endfor %} <!-- This part is not fetching the tokens correctly-->
                     <div class="stat-value">{{ total_tokens }}</div>
                     <div class="stat-label">Total Tokens</div>
                 </div>
                 <div class="stat-card">
-                    {% set arc_count = 0 %}
-                    {% for transition in petri_net_data.transitions %}
-                        {% set arc_count = arc_count + transition.from|length + transition.to|length %}
-                    {% endfor %}
+                    {% set arc_count = 0 %} <!-- This part is not fetching the transitions correctly -->
+                    {% for transition in petri_net_data.transitions %} <!-- This part is not fetching the transitions correctly -->
+                        {% set arc_count = arc_count + transition.from|length + transition.to|length %} <!-- This part is not fetching the transitions correctly -->
+                    {% endfor %} <!-- This part is not fetching the transitions correctly -->
                     <div class="stat-value">{{ arc_count }}</div>
                     <div class="stat-label">Arcs</div>
                 </div>
@@ -452,7 +454,7 @@ Petri Net Analysis: {{ filename }}
             }
             
             // Set up SVG container
-            const container = d3.select('.canvas-container');
+            const container = d3.select('#v-section');
             const containerWidth = container.node().getBoundingClientRect().width;
             const containerHeight = container.node().getBoundingClientRect().height;
             
@@ -840,23 +842,7 @@ Petri Net Analysis: {{ filename }}
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 
                 if (!isMobile) {
-                    // Get new dimensions
-                    const newWidth = container.node().getBoundingClientRect().width;
-                    const newHeight = container.node().getBoundingClientRect().height;
-                    
-                    // Update SVG size
-                    svg.attr('width', newWidth)
-                    .attr('height', newHeight);
-                    
-                    // Update forces
-                    simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
-                            .force('x', d3.forceX(newWidth / 2).strength(0.05))
-                            .force('y', d3.forceY(newHeight / 2).strength(0.05))
-                            .alpha(0.3)
-                            .restart();
-                    
-                    // Move legend
-                    legend.attr('transform', `translate(${newWidth - legendWidth - 10}, 10)`);
+                    resizeCanvas();
                 }
             });
             
@@ -864,12 +850,6 @@ Petri Net Analysis: {{ filename }}
             // Add CSS styles for D3 elements
             const style = document.createElement('style');
             style.textContent = `
-                .canvas-container {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                }
-                
                 #petri-net-svg {
                     background-color: transparent;
                     cursor: move;
@@ -900,6 +880,29 @@ Petri Net Analysis: {{ filename }}
     // Add a flag to control the debug output
     const DEBUG_MODE = false;
 
+    // Resize function
+    function resizeCanvas(){
+        // Get new dimensions
+        const newWidth = container.node().getBoundingClientRect().width;
+        const newHeight = container.node().getBoundingClientRect().height;
+        
+        // Update SVG size
+        svg.attr('width', newWidth)
+        .attr('height', newHeight);
+        
+        // Update forces
+        simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2))
+                .force('x', d3.forceX(newWidth / 2).strength(0.05))
+                .force('y', d3.forceY(newHeight / 2).strength(0.05))
+                .alpha(0.3)
+                .restart();
+        
+        // Move legend
+        legend.attr('transform', `translate(${newWidth - legendWidth - 10}, 10)`);
+    }
+
+    window.resizeCanvas = resizeCanvas;
+
         // This function runs after your existing D3 visualization is set up
     function initPetriNetSimulation(petriNetData) {
         // Store the original data safely
@@ -914,7 +917,7 @@ Petri Net Analysis: {{ filename }}
     
     // CONTROL FUNCTIONS
     function addSimulationControls() {
-        const container = d3.select('.canvas-container');
+        const container = d3.select('#v-section');
         
         // Remove existing controls if any
         container.select('.simulation-controls').remove();
@@ -982,7 +985,7 @@ Petri Net Analysis: {{ filename }}
                         const fired = performSimulationStep();
                         if (!fired) {
                             stopSimulation();
-                            alert('Simulation stopped: No enabled transitions');
+                            alert('Simulation Finished: Success 👍');
                         }
                     }, simulationSpeed);
                 }
@@ -1016,7 +1019,7 @@ Petri Net Analysis: {{ filename }}
                 // If no transitions can fire, stop simulation
                 if (!fired) {
                     stopSimulation();
-                    alert('Simulation stopped: No enabled transitions');
+                    alert('Simulation Finished: Success 👍');
                 }
             }, simulationSpeed);
         }

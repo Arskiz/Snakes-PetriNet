@@ -75,7 +75,7 @@ function redirect(redirectId) {
         999: "../../snakes"
     };
 
-    const headerElements = {
+    const pageElements = {
         header: document.getElementById("header"),
         footer: document.getElementById("footer"),
         headerLeft: document.getElementById("HeaderLeft"),
@@ -83,12 +83,13 @@ function redirect(redirectId) {
         body: document.getElementById("body")
     };
 
-    Object.values(headerElements).forEach(el => animateElement(el, "smoothToTop", 0.5));
+    Object.values(pageElements).forEach(el => animateElement(el, "smoothToTop", 0.5));
     
     let animationType = "smoothOpacityOut"; 
 
+    // Animate the page opacity before redirection
     animateElement(document.getElementById("archDiv"), animationType, 1);
-    animateElement(headerElements.body, "smoothOpacityOut", 0.9, () => {
+    animateElement(pageElements.body, "smoothOpacityOut", 0.9, () => {
         window.location.href = urls[redirectId] || "/";
     });
 }

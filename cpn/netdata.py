@@ -5,6 +5,7 @@ import json
 import re
 import math
 
+# FOR JSON CONVERSION
 def create_place(place_id, name, tokens, top, left):
     return {
         "id": place_id,
@@ -14,6 +15,7 @@ def create_place(place_id, name, tokens, top, left):
         "left": left,
     }
 
+# FOR JSON CONVERSION
 def create_transition(transition_id, name, from_places, to_places, top, left):
     return {
         "id": transition_id,
@@ -78,6 +80,11 @@ def extract_arcs_from_code(code_str):
     # Use flexible regex patterns to find add_input and add_output calls
     # IMPORTANT: The correct parameter order is (place, transition) for add_input
     # and (place, transition) for add_output in SNAKES
+    # -----------------------------------------------------
+    ####### Some awesome websites to learn REGEX #######
+    # 1. https://regexlearn.com/ 
+    # 2. https://regexone.com/
+    
     input_pattern = r"net\.add_input\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*,\s*(?:Value\s*\(\s*)?(\d+)(?:\s*\))?"
     output_pattern = r"net\.add_output\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*,\s*(?:Value\s*\(\s*)?(\d+)(?:\s*\))?"
     
@@ -245,6 +252,7 @@ def upload(exec_context, request=None, original_code=None):
             "success": False,
             "message": "No PetriNet instances found."
         }
+    # If any problems are encountered with uploading:
     except Exception as e:
         print(f"Error in upload function: {e}")
         import traceback
